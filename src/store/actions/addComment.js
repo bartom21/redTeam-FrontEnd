@@ -7,7 +7,7 @@ export const addComment = (commentData) => {
         const appointmentId = commentData.appointment.id;
         getState().auth.currentUser.getIdToken(true)
             .then(idToken => {
-                fetch(`https://back-red-team.vercel.app/addComment/${appointmentId}`, {
+                fetch(`http://localhost:8080/addComment/${appointmentId}`, {
                     method: 'PUT',
                     headers: {
                     "Content-Type": "application/json",

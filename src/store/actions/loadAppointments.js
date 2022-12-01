@@ -4,7 +4,7 @@ export const loadAppointments = (handleLoading) => {
     return (dispatch, getState) => {
         getState().auth.currentUser.getIdToken(true)
             .then(idToken => {
-                fetch('https://back-red-team.vercel.app/calendar', {
+                fetch('http://localhost:8080/calendar', {
                     method: 'GET',
                     headers: {
                     "Content-Type": "application/json",
