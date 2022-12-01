@@ -4,7 +4,7 @@ export const createUserProfile = (user) => {
     return (dispatch, getState) => {
         getState().auth.currentUser.getIdToken(true)
             .then(idToken => {
-                fetch('http://localhost:8080/user', {
+                fetch('https://back-red-team.vercel.app/user', {
                     method: 'POST',
                     headers: {
                     "Content-Type": "application/json",

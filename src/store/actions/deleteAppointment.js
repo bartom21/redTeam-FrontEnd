@@ -9,7 +9,7 @@ export const deleteAppointment = (event) => {
         const appointmentId = event.deleted;
         getState().auth.currentUser.getIdToken(true)
             .then(idToken => {
-                fetch(`http://localhost:8080/deleteSession/${appointmentId}`, {
+                fetch(`https://back-red-team.vercel.app/deleteSession/${appointmentId}`, {
                     method: 'PUT',
                     headers: {
                     "Content-Type": "application/json",
