@@ -6,6 +6,8 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import Divider from '@mui/material/Divider';
 import PersonAdd from '@mui/icons-material/PersonAdd';
 import Settings from '@mui/icons-material/Settings';
+import PaidIcon from '@mui/icons-material/Paid';
+import ReceiptIcon from '@mui/icons-material/Receipt';
 import Logout from '@mui/icons-material/Logout';
 import GroupIcon from '@mui/icons-material/Group';
 import { Link, useHistory } from "react-router-dom"
@@ -40,6 +42,14 @@ export default function BarMenu(props) {
         history.push("/usuarios")
     }
 
+    function handleCobros() {
+      history.push("/cobros")
+    }
+
+    function handleRates() {
+      history.push("/tarifas")
+    }
+
     var items = (<MenuList>
         <MenuItem>
           <Avatar /> Perfil
@@ -58,13 +68,26 @@ export default function BarMenu(props) {
             <MenuItem>
               <Avatar /> Perfil
             </MenuItem>
-            <Divider />
             <MenuItem onClick={handleAdminUsers}>
               <ListItemIcon>
                 <GroupIcon fontSize="small" />
               </ListItemIcon>
               Administar Usuarios
             </MenuItem>
+            <Divider />
+            <MenuItem onClick={handleRates}>
+              <ListItemIcon>
+                <PaidIcon fontSize="small" />
+              </ListItemIcon>
+              Administrar Tarifas
+            </MenuItem>
+            <MenuItem onClick={handleCobros}>
+              <ListItemIcon>
+                <ReceiptIcon fontSize="small" />
+              </ListItemIcon>
+              Registro de Cobros
+            </MenuItem>
+            <Divider />
             <MenuItem>
               <ListItemIcon>
                 <Settings fontSize="small" />

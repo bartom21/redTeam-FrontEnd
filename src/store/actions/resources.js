@@ -5,7 +5,8 @@ export const loadTherapies = () => {
     return (dispatch, getState) => {
         getState().auth.currentUser.getIdToken(true)
             .then(idToken => {
-                fetch('https://back-red-team.vercel.app/therapies', {
+                fetch('
+https://back-red-team.vercel.app/therapies', {
                     method: 'GET',
                     headers: {
                     "Content-Type": "application/json",
@@ -35,7 +36,8 @@ export const loadLocations = () => {
     return (dispatch, getState) => {
         getState().auth.currentUser.getIdToken(true)
             .then(idToken => {
-                fetch('https://back-red-team.vercel.app/locations', {
+                fetch('
+https://back-red-team.vercel.app/locations', {
                     method: 'GET',
                     headers: {
                     "Content-Type": "application/json",

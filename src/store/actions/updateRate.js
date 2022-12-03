@@ -1,16 +1,22 @@
-export const LOADPROFESSIONALS = 'LOADPROFESSIONALS';
 
-export const loadProfessionals = () => {
+export const UPDATETHERAPY = 'UPDATETHERAPY';
+
+export const updateRate = (data) => {
+    console.log("editProfile, ", data);
     return (dispatch, getState) => {
+        const id = data.id
         getState().auth.currentUser.getIdToken(true)
             .then(idToken => {
-                fetch('
-https://back-red-team.vercel.app/usersByRole/profesional', {
-                    method: 'GET',
+                fetch(`
+https://back-red-team.vercel.app/updateRate/${id}`, {
+                    method: 'PUT',
                     headers: {
                     "Content-Type": "application/json",
                     "Authorization": idToken
-                    }
+                    },
+                    body: JSON.stringify({
+                        ...data
+                    })
                 })
                 .then((response) => {
                     console.log('RESPONSE');
@@ -23,8 +29,8 @@ https://back-red-team.vercel.app/usersByRole/profesional', {
                     return response.json();
                 })
                 .then((myJson) => {
-                    console.log(myJson);
-                    dispatch({type:LOADPROFESSIONALS, users: myJson.users});
+                    console.log('RESPONSE', myJson);
+                    dispatch({type: UPDATETHERAPY, therapy: myJson});
                 })
             })
             .catch(err => console.log(err));

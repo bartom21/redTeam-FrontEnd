@@ -6,7 +6,8 @@ export const notificationRead = (notificationId) => {
     return (dispatch, getState) => {
         getState().auth.currentUser.getIdToken(true)
             .then(idToken => {
-                fetch(`https://back-red-team.vercel.app/notification/${notificationId}`, {
+                fetch(`
+https://back-red-team.vercel.app/notification/${notificationId}`, {
                     method: 'PUT',
                     headers: {
                     "Content-Type": "application/json",

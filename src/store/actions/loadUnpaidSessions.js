@@ -1,11 +1,11 @@
-export const LOADPROFESSIONALS = 'LOADPROFESSIONALS';
+export const LOADUNPAIDSESSIONS = 'LOADUNPAIDSESSIONS';
 
-export const loadProfessionals = () => {
+export const loadUnpaidSessions = () => {
     return (dispatch, getState) => {
         getState().auth.currentUser.getIdToken(true)
             .then(idToken => {
                 fetch('
-https://back-red-team.vercel.app/usersByRole/profesional', {
+https://back-red-team.vercel.app/unpaidSessions', {
                     method: 'GET',
                     headers: {
                     "Content-Type": "application/json",
@@ -24,7 +24,7 @@ https://back-red-team.vercel.app/usersByRole/profesional', {
                 })
                 .then((myJson) => {
                     console.log(myJson);
-                    dispatch({type:LOADPROFESSIONALS, users: myJson.users});
+                    dispatch({type:LOADUNPAIDSESSIONS, unpaidSessions: myJson.appointments});
                 })
             })
             .catch(err => console.log(err));

@@ -10,6 +10,8 @@ import {auth} from '../firebase'
 import PatientCalendar from "./PatientCalendar"
 import ProfessionalCalendar from "./ProfessionalCalendar"
 import NotAsignedHome from "./NotAsignedHome"
+import RateGrid from "./RateGrid"
+import BillGrid from "./BillGrid"
 
 
 
@@ -22,6 +24,8 @@ function AuthSwitch(props) {
             <Route exact path="/Calendar" component={AdminCalendar} />
             <Route exact path="/perfil" component={Profile}/>
             <Route exact path="/usuarios" component={UsersGrid}/>
+            <Route exact path="/tarifas" component={RateGrid}/>
+            <Route exact path="/cobros" component={BillGrid}/>
             <Route exact path="/sesiones" component={SessionsGrid}/>
             <Route path="/" component={Home} />
         </Switch>
