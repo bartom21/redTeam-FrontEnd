@@ -17,6 +17,7 @@ import { DataGrid } from '@mui/x-data-grid';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import { gridColumnsTotalWidthSelector } from '@mui/x-data-grid/hooks/features/columns';
+import { addInvoice } from '../store/actions/addInvoice';
 
 
 
@@ -24,7 +25,7 @@ export default function VerticalLinearStepper() {
   const [activeStep, setActiveStep] = React.useState(0);
   const patients = useSelector(state => state.user.patients);
   const [value, setValue] = useState(patients.length > 0 ? patients[0] : '');
-  const unpaidSessions = useSelector(state => state.resource.unpaidSessions);
+  const unpaidSessions = useSelector(state => state.billing.unpaidSessions);
   const [selectionModel, setSelectionModel] = useState([]);
   const [invoice, setInvoice] = useState(null)
   const [rows, setRows] = useState([])
@@ -47,6 +48,7 @@ export default function VerticalLinearStepper() {
     }
     if(activeStep === 2){
       console.log('invoice: ', invoice)
+      dispatch(addInvoice(invoice))
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
     }
   };

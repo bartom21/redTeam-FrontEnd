@@ -10,6 +10,7 @@ import authReducer from '../store/reducers/auth';
 import userReducer from '../store/reducers/user';
 import resourceReducer from '../store/reducers/resource';
 import notificationReducer from '../store/reducers/notification';
+import billingReducer from '../store/reducers/billing';
 import AppContent from "./AppContent"
 
 const rootReducer = combineReducers({
@@ -18,7 +19,8 @@ const rootReducer = combineReducers({
   auth: authReducer,
   user: userReducer,
   resource: resourceReducer,
-  notification: notificationReducer
+  notification: notificationReducer,
+  billing: billingReducer
 });
 const store = createStore(rootReducer, applyMiddleware(ReduxThunk));
 

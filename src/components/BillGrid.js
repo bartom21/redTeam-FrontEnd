@@ -26,19 +26,19 @@ import { loadLocations, loadTherapies } from "../store/actions/resources.js";
 import IconButton from '@mui/material/IconButton';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { Link, useHistory } from "react-router-dom";
-import { Avatar, Chip } from "@mui/material";
+import { Avatar, Chip, DialogTitle } from "@mui/material";
 import Box from '@mui/material/Box';
 import Fab from '@mui/material/Fab';
 import AddIcon from '@mui/icons-material/Add';
 import VerticalLinearStepper from "./VerticalStepper.js";
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
+import { loadInvocies } from "../store/actions/loadInvoices.js";
 
 
 const getRowId = row => row.id;
 
 const ViewOnCalendarCell = (props) => {
-  console.log('PROPS ',props)
   const history = useHistory()
     return (
     <Table.Cell {...props} style={{display: 'flex', alignContent: 'center' }}>
@@ -91,6 +91,8 @@ export default function BillGrid(props) {
   const appointments = useSelector(state => state.calendar.appointments);
   const therapies = useSelector(state => state.resource.therapies);
   const locations = useSelector(state => state.resource.locations);
+  const invoices = useSelector(state => state.billing.invoices);
+  console.log('invoices, ',invoices)
   const [pageSize, setPageSize] = useState(0);
   const [pageSizes] = useState([5, 10, 0]);
   const [loading, setLoading] = useState(false);
@@ -107,12 +109,6 @@ export default function BillGrid(props) {
     { columnName: 'isRecurrent', width: window.innerWidth/columns.length },
     { columnName: 'link', width: window.innerWidth/(columns.length )}
   ])
-  
-  const steps = [
-    'Select master blaster campaign settings',
-    'Create an ad group',
-    'Create an ad',
-  ];
 
   const handleLoading = () => {
     setLoading(false)
@@ -127,9 +123,6 @@ export default function BillGrid(props) {
   };
 
   const handleAppointmentsToRows = () => {
-    console.log('terapias ', therapies)
-    console.log('locations ', locations)
-    console.log('sesiones ', appointments)
 
 
     setRows(() => {
@@ -147,15 +140,14 @@ export default function BillGrid(props) {
       }
     })
   })
-    console.log('rows ', rows)
   }
 
   useEffect(() => {
-    console.log('dispatch')
     setLoading(true)
     dispatch(loadAppointments(handleLoading))
     dispatch(loadTherapies())
     dispatch(loadLocations())
+    dispatch(loadInvocies())
   }, []);
 
   useEffect(() => {
@@ -228,6 +220,7 @@ export default function BillGrid(props) {
         </Fab>
     </Box>
     <Dialog open={open} onClose={handleCloseDialog}>
+        <DialogTitle>Crear cobro a paciente</DialogTitle>
         <DialogContent>
             <VerticalLinearStepper></VerticalLinearStepper>
         </DialogContent>
