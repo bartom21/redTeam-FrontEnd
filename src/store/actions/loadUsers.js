@@ -4,8 +4,7 @@ export const loadUsers = (handleloading) => {
     return (dispatch, getState) => {
         getState().auth.currentUser.getIdToken(true)
             .then(idToken => {
-                fetch('
-https://back-red-team.vercel.app/allUsers', {
+                fetch('https://back-red-team.vercel.app/allUsers', {
                     method: 'GET',
                     headers: {
                     "Content-Type": "application/json",

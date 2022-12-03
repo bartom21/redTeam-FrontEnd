@@ -7,8 +7,7 @@ export const updateUserProfile = (data) => {
         const uid = data.id
         getState().auth.currentUser.getIdToken(true)
             .then(idToken => {
-                fetch(`
-https://back-red-team.vercel.app/updateProfile/${uid}`, {
+                fetch(`https://back-red-team.vercel.app/updateProfile/${uid}`, {
                     method: 'PUT',
                     headers: {
                     "Content-Type": "application/json",

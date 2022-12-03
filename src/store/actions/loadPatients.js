@@ -4,8 +4,7 @@ export const loadPatients = () => {
     return (dispatch, getState) => {
         getState().auth.currentUser.getIdToken(true)
             .then(idToken => {
-                fetch('
-https://back-red-team.vercel.app/usersByRole/paciente', {
+                fetch('https://back-red-team.vercel.app/usersByRole/paciente', {
                     method: 'GET',
                     headers: {
                     "Content-Type": "application/json",

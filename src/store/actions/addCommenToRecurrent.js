@@ -7,8 +7,7 @@ export const addCommentToRecurrent = (commentData) => {
         const appointmentId = commentData.appointment.id;
         getState().auth.currentUser.getIdToken(true)
             .then(idToken => {
-                fetch(`
-https://back-red-team.vercel.app/addRComment/${appointmentId}`, {
+                fetch(`https://back-red-team.vercel.app/addRComment/${appointmentId}`, {
                     method: 'PUT',
                     headers: {
                     "Content-Type": "application/json",
