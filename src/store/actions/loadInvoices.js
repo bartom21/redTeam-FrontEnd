@@ -1,6 +1,6 @@
 export const LOADINVOICES = 'LOADINVOICES';
 
-export const loadInvocies = () => {
+export const loadInvocies = (handleLoading) => {
     return (dispatch, getState) => {
         getState().auth.currentUser.getIdToken(true)
             .then(idToken => {
@@ -23,6 +23,7 @@ export const loadInvocies = () => {
                 })
                 .then((myJson) => {
                     dispatch({type:LOADINVOICES, invoices: myJson.invoices});
+                    handleLoading()
                 })
             })
             .catch(err => console.log(err));

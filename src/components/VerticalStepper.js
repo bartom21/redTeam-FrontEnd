@@ -7,7 +7,6 @@ import StepContent from '@mui/material/StepContent';
 import Button from '@mui/material/Button';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
-import { loadPatients } from '../store/actions/loadPatients';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect } from 'react';
 import { Autocomplete, TextField } from '@mui/material';
@@ -21,10 +20,9 @@ import { addInvoice } from '../store/actions/addInvoice';
 
 
 
-export default function VerticalLinearStepper() {
+export default function VerticalLinearStepper(props) {
   const [activeStep, setActiveStep] = React.useState(0);
-  const patients = useSelector(state => state.user.patients);
-  const [value, setValue] = useState(patients.length > 0 ? patients[0] : '');
+  const [value, setValue] = useState(props.patients.length > 0 ? props.patients[0] : '');
   const unpaidSessions = useSelector(state => state.billing.unpaidSessions);
   const [selectionModel, setSelectionModel] = useState([]);
   const [invoice, setInvoice] = useState(null)
@@ -34,7 +32,19 @@ export default function VerticalLinearStepper() {
   const handleNext = () => {
     //console.log('STEP: ',activeStep)
     if(activeStep === 0 && value){
-      setRows(unpaidSessions.filter((x) => x.patient===value.id))
+      const sessions = unpaidSessions
+                          .filter((x) => x.patient===value.id)
+                          .map((session) => {
+                            const startDate = new Date(session.startDate).toLocaleDateString('en-GB').concat(' ', new Date(session.startDate).toLocaleTimeString());
+                            const endDate = new Date(session.endDate).toLocaleDateString('en-GB').concat(' ', new Date(session.endDate).toLocaleTimeString());
+                            return {
+                                ...session,
+                                startDate,
+                                endDate
+                            }
+                        })
+      
+      setRows(sessions)
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
     }
     if(activeStep === 1 && selectionModel.length > 0){
@@ -66,7 +76,6 @@ export default function VerticalLinearStepper() {
   };
 
   useEffect(() => {
-    dispatch(loadPatients());
     dispatch(loadUnpaidSessions())
   }, []);
 
@@ -132,7 +141,7 @@ const unpaidSessionsGrid = (
       <Autocomplete
         disablePortal
         id="combo-box-demo"
-        options={patients}
+        options={props.patients}
         fullWidth
         sx={{mt:1}}
         value={value}

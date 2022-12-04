@@ -9,6 +9,7 @@ import {
   SortingState,
   IntegratedSorting,
   IntegratedFiltering,
+  RowDetailState
 } from '@devexpress/dx-react-grid';
 import {
   Grid,
@@ -18,15 +19,14 @@ import {
   Toolbar,
   SearchPanel,
   TableFilterRow,
-  TableColumnResizing
+  TableColumnResizing,
+  TableRowDetail
 } from '@devexpress/dx-react-grid-material-ui';
 import { Loading } from './Loading/Loading.js';
-import { loadAppointments } from "../store/actions/loadAppointments";
-import { loadLocations, loadTherapies } from "../store/actions/resources.js";
 import IconButton from '@mui/material/IconButton';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import { Link, useHistory } from "react-router-dom";
-import { Avatar, Chip, DialogTitle } from "@mui/material";
+import { useHistory } from "react-router-dom";
+import { DialogTitle } from "@mui/material";
 import Box from '@mui/material/Box';
 import Fab from '@mui/material/Fab';
 import AddIcon from '@mui/icons-material/Add';
@@ -34,6 +34,8 @@ import VerticalLinearStepper from "./VerticalStepper.js";
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import { loadInvocies } from "../store/actions/loadInvoices.js";
+import Typography from "./Typography.js";
+import { loadPatients } from "../store/actions/loadPatients.js";
 
 
 const getRowId = row => row.id;
@@ -76,38 +78,68 @@ const FilterCell = (props) => {
   return <TableFilterRow.Cell {...props} />;
 };
 
+const RowDetail = ({ row }) => {
+    const [rows, setRows] = useState([]);
+    const [columns] = useState([
+        { name: 'title', title: 'Titulo' },
+        { name: 'startDate', title: 'Fecha de inicio' },
+        { name: 'endDate', title: 'Fecha de fin' },
+        { name: 'amount', title: 'Monto (ARS$)' }
+      ]);
+    
+    const handleSessionsToRows = () => {
+        setRows(() => {
+            return row.sessions.map((session) => {
+                const startDate = new Date(session.startDate).toLocaleDateString('en-GB').concat(' ', new Date(session.startDate).toLocaleTimeString());
+                const endDate = new Date(session.endDate).toLocaleDateString('en-GB').concat(' ', new Date(session.endDate).toLocaleTimeString());
+                return {
+                    ...session,
+                    startDate,
+                    endDate
+                }
+            })
+        })
+      }
+
+      useEffect(() => {
+        handleSessionsToRows()
+      }, []);
+
+    return (
+        <>
+        <Typography>Detalle sesiones cobradas:</Typography>
+        <Paper>
+            <Grid
+                rows={rows}
+                columns={columns}
+            >
+            <Table />
+            <TableHeaderRow />
+            </Grid>
+      </Paper>
+      </>
+     )};
+
 export default function BillGrid(props) {
   const [columns] = useState([
-    { name: 'title', title: 'Titulo' },
-    { name: 'therapy', title: 'Terapia' },
-    { name: 'patient', title: 'Paciente/s' },
-    { name: 'professional', title: 'Profesional/es' },
-    { name: 'location', title: 'Ubicación' },
-    { name: 'date', title: 'Fecha de inicio' },
-    { name: 'isRecurrent', title: '¿Es recurrente?' },
-    { name: 'link', title: 'Ver en Calendario'}
+    { name: 'patient', title: 'Paciente' },
+    { name: 'creationDate', title: 'Fecha de creación' },
+    { name: 'amount', title: 'Monto (ARS$)' }
   ]);
-  const [rows, setRows] = useState([]);
-  const appointments = useSelector(state => state.calendar.appointments);
-  const therapies = useSelector(state => state.resource.therapies);
-  const locations = useSelector(state => state.resource.locations);
   const invoices = useSelector(state => state.billing.invoices);
-  console.log('invoices, ',invoices)
+  //console.log('invoices, ',invoices)
   const [pageSize, setPageSize] = useState(0);
   const [pageSizes] = useState([5, 10, 0]);
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
+  const [rows, setRows] = useState([]);
+  const patients = useSelector(state => state.user.patients);
 
   const [columnWidths, setColumnWidths] = useState([
-    { columnName: 'title', width: window.innerWidth/columns.length },
-    { columnName: 'therapy', width: window.innerWidth/columns.length},
     { columnName: 'patient', width: window.innerWidth/columns.length },
-    { columnName: 'professional', width: window.innerWidth/columns.length },
-    { columnName: 'location', width: window.innerWidth/columns.length },
-    { columnName: 'date', width: window.innerWidth/columns.length },
-    { columnName: 'isRecurrent', width: window.innerWidth/columns.length },
-    { columnName: 'link', width: window.innerWidth/(columns.length )}
+    { columnName: 'creationDate', width: window.innerWidth/columns.length},
+    { columnName: 'amount', width: window.innerWidth/columns.length }
   ])
 
   const handleLoading = () => {
@@ -122,49 +154,37 @@ export default function BillGrid(props) {
     setOpen(true);
   };
 
-  const handleAppointmentsToRows = () => {
-
-
+  const handleInvoicesToRows = () => {
     setRows(() => {
-      return appointments.map((appointment) => {
-      const therapy = therapies.find((therapy)=> therapy.id == appointment.therapy)
-      const location = locations.find((location)=> location.id == appointment.location)
-      const patients = (appointment.patients.map((item)=> item.name)).join(', ')
-      const professionals = (appointment.professionals.map((item)=> item.name)).join(', ')
-      return {
-        ...appointment,
-        therapy: therapy ? therapy.name : 'No encontrada',
-        location: location ? location.name : 'No encontrada',
-        patient: patients,
-        professional: professionals
-      }
+        return invoices.map((invoice) => {
+            const patient = patients.find((patient)=> patient.id === invoice.patient)
+            console.log('paciente ', patient)
+            const creationDate = new Date(invoice.creationDate).toLocaleDateString('en-GB').concat(' ', new Date(invoice.creationDate).toLocaleTimeString());
+            return {
+                ...invoice,
+                patient: patient ? patient.name : '',
+                creationDate
+            }
+        })
     })
-  })
   }
 
   useEffect(() => {
     setLoading(true)
-    dispatch(loadAppointments(handleLoading))
-    dispatch(loadTherapies())
-    dispatch(loadLocations())
-    dispatch(loadInvocies())
+    dispatch(loadPatients());
+    dispatch(loadInvocies(handleLoading))
   }, []);
 
   useEffect(() => {
-    handleAppointmentsToRows()
-  }, [appointments, locations, therapies]);
+    handleInvoicesToRows()
+  }, [invoices, patients]);
 
   useEffect(() => {
     function handleWindowResize() {
       setColumnWidths(
-        [{ columnName: 'title', width: window.innerWidth/columns.length },
-        { columnName: 'therapy', width: window.innerWidth/columns.length},
-        { columnName: 'patient', width: window.innerWidth/columns.length },
-        { columnName: 'professional', width: window.innerWidth/columns.length },
-        { columnName: 'location', width: window.innerWidth/columns.length },
-        { columnName: 'date', width: window.innerWidth/columns.length },
-        { columnName: 'isRecurrent', width: window.innerWidth/columns.length },
-        { columnName: 'link', width: window.innerWidth/(columns.length * 2)}]);
+        [{ columnName: 'patient', width: window.innerWidth/columns.length },
+        { columnName: 'creationDate', width: window.innerWidth/columns.length},
+        { columnName: 'amount', width: window.innerWidth/columns.length }]);
     }
 
     window.addEventListener('resize', handleWindowResize);
@@ -195,6 +215,9 @@ export default function BillGrid(props) {
           defaultSorting={[]}
         />
         <IntegratedSorting />
+        <RowDetailState
+          defaultExpandedRowIds={[]}
+        />
         <Table
           cellComponent={Cell}
         />
@@ -211,6 +234,9 @@ export default function BillGrid(props) {
         <TableFilterRow
           cellComponent={FilterCell}
         />
+        <TableRowDetail
+          contentComponent={RowDetail}
+        />
       </Grid>
       {loading && <Loading />}
     </Paper>
@@ -222,7 +248,7 @@ export default function BillGrid(props) {
     <Dialog open={open} onClose={handleCloseDialog}>
         <DialogTitle>Crear cobro a paciente</DialogTitle>
         <DialogContent>
-            <VerticalLinearStepper></VerticalLinearStepper>
+            <VerticalLinearStepper patients={patients}></VerticalLinearStepper>
         </DialogContent>
     </Dialog>
     </>
