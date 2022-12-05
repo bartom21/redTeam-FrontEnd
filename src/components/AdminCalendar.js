@@ -260,6 +260,7 @@ const StyledIconButton = styled(IconButton)(() => ({
 const Header = (({
   children, appointmentData, ...restProps
 }) => {
+      console.log('RESTPOROPS: ',restProps)
       const commentRef = useRef()
       const currentUser = useSelector(state => state.auth.currentUser);
       const [anchorHeaderMenu, setAnchorHeaderMenu] = useState(null);
@@ -328,6 +329,8 @@ const Header = (({
           {...restProps}
           className={classNames(getClassByLocation(classes, currentAppointment.location), classes.header)}
           appointmentData={currentAppointment}
+          showDeleteButton={currentAppointment ? (currentAppointment.state === 'finalized' ? false : true) : true}
+          showOpenButton={currentAppointment ? (currentAppointment.state === 'finalized' ? false : true) : true}
           >
           <StyledIconButton
           onClick={handleHeaderMenuClick}

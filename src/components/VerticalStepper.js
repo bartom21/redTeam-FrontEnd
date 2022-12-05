@@ -105,14 +105,21 @@ export default function VerticalLinearStepper(props) {
                             }
                         })
       if(props.editing && value.id === props.editedRow.patientObj.id){
-        sessions = sessions.concat(props.editedRow.sessions)
+        sessions = sessions.concat(props.editedRow.sessions.map((session) => {
+                    const startDate = new Date(session.startDate).toLocaleDateString('en-GB').concat(' ', new Date(session.startDate).toLocaleTimeString());
+                    const endDate = new Date(session.endDate).toLocaleDateString('en-GB').concat(' ', new Date(session.endDate).toLocaleTimeString());
+                    return {
+                        ...session,
+                        startDate,
+                        endDate
+                    }
+                }));
         setSelectionModel(props.editedRow.sessions.map(x => x.id));
       }
       setRows(sessions)
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
     }
     if(activeStep === 1 && selectionModel.length > 0){
-      //console.log('reduce ',selectionModel.map(item => item.amount).reduce((prev, next) => prev + next))
       let newSessions = []
       if(props.editing){
         newSessions = unpaidSessions.concat(props.editedRow.sessions).filter((x)=> selectionModel.includes(x.id))
@@ -208,7 +215,7 @@ const unpaidSessionsGrid = (
     <Card sx={{ minWidth: 275 }}>
       <CardContent>
         <Typography variant="h5" component="div">
-          Monto total: {invoice ? invoice.sessions.map(item => item.amount).reduce((prev, next) => prev + next) : '0'} $
+          Monto total: {invoice ? invoice.sessions.map(item => parseFloat(item.amount)).reduce((prev, next) => prev + next).toFixed(2) : '0'} $
         </Typography>
         <Typography sx={{ mb: 1.5 }} color="text.secondary">
           Paciente: {value ? value.name : ''}

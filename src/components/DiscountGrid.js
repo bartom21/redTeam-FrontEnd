@@ -25,69 +25,38 @@ import {
 } from '@devexpress/dx-react-grid-material-ui';
 import { loadPatients } from "../store/actions/loadPatients.js";
 import { loadDiscounts } from "../store/actions/loadDiscounts.js";
-import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
-import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
 import { Loading } from './Loading/Loading.js';
-import { editRole } from "../store/actions/editRole";import { editDiscount } from "../store/actions/editDiscount.js";
-;
-
-
-const AddButton = ({ onExecute }) => (
-  <div style={{ textAlign: 'center' }}>
-    <Button
-      color="primary"
-      onClick={onExecute}
-      title="Create new row"
-    >
-      New
-    </Button>
-  </div>
-);
+import { editDiscount } from "../store/actions/editDiscount.js";
+import { Alert, Snackbar } from "@mui/material";
 
 const EditButton = ({ onExecute }) => (
-  <IconButton onClick={onExecute} title="Edit row" size="large">
-    <EditIcon />
-  </IconButton>
-);
-
-const DeleteButton = ({ onExecute }) => (
-  <IconButton
-    onClick={() => {
-      // eslint-disable-next-line
-      if (window.confirm('Are you sure you want to delete this row?')) {
-        onExecute();
-      }
-    }}
-    title="Delete row"
-    size="large"
-  >
-    <DeleteIcon />
-  </IconButton>
-);
-
-const CommitButton = ({ onExecute }) => (
-  <IconButton onClick={onExecute} title="Save changes" size="large">
-    <SaveIcon />
-  </IconButton>
-);
-
-const CancelButton = ({ onExecute }) => (
-  <IconButton color="secondary" onClick={onExecute} title="Cancel changes" size="large">
-    <CancelIcon />
-  </IconButton>
-);
-
-const commandComponents = {
-  add: AddButton,
-  edit: EditButton,
-  delete: DeleteButton,
-  commit: CommitButton,
-  cancel: CancelButton,
-};
+    <IconButton onClick={onExecute} title="Editar Descuento" size="large">
+      <EditIcon />
+    </IconButton>
+  );
+  
+  const CommitButton = ({ onExecute }) => (
+    <IconButton onClick={onExecute} title="Guardar los cambios" size="large">
+      <SaveIcon />
+    </IconButton>
+  );
+  
+  const CancelButton = ({ onExecute }) => (
+    <IconButton color="secondary" onClick={onExecute} title="Cancelar los cambios" size="large">
+      <CancelIcon />
+    </IconButton>
+  );
+  
+  const commandComponents = {
+    edit: EditButton,
+    commit: CommitButton,
+    cancel: CancelButton,
+  };
+  
 
 const Command = ({ id, onExecute }) => {
   const CommandButton = commandComponents[id];
@@ -103,16 +72,62 @@ const EditCell = (props) => {
     return <TableEditRow.Cell {...props} />;
   };
 
-const Cell = (props) => {
-  return <Table.Cell {...props} />;
-};
-
 const FilterCell = (props) => {
   return <TableFilterRow.Cell {...props} />;
 };
 
 
 const getRowId = row => row.id;
+
+const requiredRule = {
+    isValid: value => value?.trim().length > 0,
+    errorText: 'Este campo no puede estar vacío',
+  };
+  const numberRule = {
+    isValid: value => value ? value.match(/^-?\d+$/) || value.match(/^\d+\.\d+$/) : false,
+    errorText: 'Este campo debe contener solo números',
+  };
+  const percentageRule = {
+    isValid: value => value ? (value > 0 && value < 100) : false,
+    errorText: 'El valor debe ser un porcentaje dentro del rango (0,100)',
+  };
+  const validationRules = {
+    discount: [requiredRule, numberRule, percentageRule],
+  };
+  
+  const validate = (changed, validationStatus) => Object.keys(changed).reduce((status, id) => {
+    let rowStatus = validationStatus[id] || {};
+    if (changed[id]) {
+      rowStatus = {
+        ...rowStatus,
+        ...Object.keys(changed[id]).reduce((acc, field) => {
+          const invalidRule = validationRules[field]?.find((rule) => !rule.isValid(changed[id][field]));
+          console.log(invalidRule)
+          let fieldStatus = {}
+          if(invalidRule){
+            fieldStatus = {
+                ...acc,
+                [field]: {
+                    isValid: false,
+                    error: invalidRule.errorText,
+                }
+            }
+          }else{
+            fieldStatus = {
+                ...acc,
+                [field]: {
+                    isValid: true,
+                    error: '',
+                }
+            }
+          }
+          return fieldStatus;
+        }, {}),
+      };
+    }
+  
+    return { ...status, [id]: rowStatus };
+  }, {});
 
 export default function DiscountGrid(props) {
   const [columns] = useState([
@@ -129,23 +144,26 @@ export default function DiscountGrid(props) {
   const [pageSizes] = useState([5, 10, 0]);
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
-
-  const commitChanges = (action) => {
-    console.log(action)
-    if(action.changed){
-        if(Object.values(action.changed)[0].discount){
-            console.log('dispatch')
-            
-            setLoading(true)
-            dispatch(editDiscount(action, handleLoading))
-        }
-    }
-    //setRows(changedRows);
-  };
+  const [editingRowIds, setEditingRowIds] = useState([]);
+  const [rowChanges, setRowChanges] = useState({});
+  const [validationStatus, setValidationStatus] = useState({});
+  const [error, setError] = useState('')
 
   const handleLoading = () => {
     setLoading(false)
   };
+
+  const commitChanges = ({changed}) => {
+    if (Object.values(changed)[0]) {
+      const validation = validate(changed, validationStatus)
+      setValidationStatus({ ...validationStatus, ...validation });
+      const validationValue = Object.values(validation)[0]
+      if( validationValue && validationValue.discount && validationValue.discount.isValid){
+        setLoading(true)
+        dispatch(editDiscount(changed, handleLoading))
+    }
+  };
+}
 
   const handleDiscountsToRows = () => {
     setRows(() => {
@@ -196,6 +214,24 @@ export default function DiscountGrid(props) {
     };
   }, []);
 
+  const Cell = React.useCallback((props) => {
+    const { tableRow: { rowId }, column: { name: columnName } } = props;
+    const columnStatus = validationStatus[rowId]?.[columnName];
+    const valid = !columnStatus || columnStatus.isValid;
+    const style = {
+      ...(!valid ? { border: '1px solid red' } : null),
+    };
+    const title = valid ? '' : validationStatus[rowId][columnName].error;
+    if(title){setError(title)}
+    return (
+      <Table.Cell
+        {...props}
+        style={style}
+        title={title}
+      />
+    );
+  }, [validationStatus]);
+
   return (
     <Paper>
       <Grid
@@ -214,8 +250,12 @@ export default function DiscountGrid(props) {
         <IntegratedFiltering />
         <IntegratedPaging />
         <EditingState
-          onCommitChanges={commitChanges}
-          columnExtensions={editingStateColumnExtensions}
+          editingRowIds={editingRowIds}
+          onEditingRowIdsChange={setEditingRowIds}
+          rowChanges={rowChanges}
+          onRowChangesChange={setRowChanges}
+       onCommitChanges={commitChanges}
+       columnExtensions={editingStateColumnExtensions}
         />
         <SortingState
           defaultSorting={[]}
@@ -245,6 +285,15 @@ export default function DiscountGrid(props) {
           cellComponent={FilterCell}
         />
       </Grid>
+      {error && <Snackbar
+      autoHideDuration={10000}
+        anchorOrigin={{ vertical:'bottom', horizontal:'center' }}
+        open={error ? true : false}
+        onClose={() => setError('')}
+        sx={{ width: '60%' }}
+      >
+         <Alert severity="error" sx={{ width: '100%' }}>{error}</Alert>
+        </Snackbar>}
       {loading && <Loading />}
     </Paper>
   );

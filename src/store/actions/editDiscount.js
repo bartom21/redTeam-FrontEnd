@@ -1,10 +1,10 @@
 
 export const EDITDISCOUNT = 'EDITDISCOUNT';
 
-export const editDiscount = (event, handleLoading) => {
+export const editDiscount = (changed, handleLoading) => {
     console.log("editAppointment");
     return (dispatch, getState) => {
-        const id = Object.keys(event.changed)[0];
+        const id = Object.keys(changed)[0];
         getState().auth.currentUser.getIdToken(true)
             .then(idToken => {
                 fetch(`https://back-red-team.vercel.app/discount/${id}`, {
@@ -14,7 +14,7 @@ export const editDiscount = (event, handleLoading) => {
                     "Authorization": idToken
                     },
                     body: JSON.stringify({
-                    ...event.changed[id]
+                    ...changed[id]
                     })
                 })
                 .then((response) => {
@@ -28,9 +28,9 @@ export const editDiscount = (event, handleLoading) => {
                     return response.json();
                 })
                 .then((myJson) => {
-                    handleLoading()
                     console.log(myJson);
                     dispatch({type:EDITDISCOUNT, discount: myJson.discount});
+                    if(handleLoading){handleLoading()}
                 })
             })
             .catch(err => console.log(err));

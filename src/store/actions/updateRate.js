@@ -1,7 +1,7 @@
 
 export const UPDATETHERAPY = 'UPDATETHERAPY';
 
-export const updateRate = (data) => {
+export const updateRate = (data , handleLoading) => {
     console.log("editProfile, ", data);
     return (dispatch, getState) => {
         const id = data.id
@@ -30,6 +30,7 @@ export const updateRate = (data) => {
                 .then((myJson) => {
                     console.log('RESPONSE', myJson);
                     dispatch({type: UPDATETHERAPY, therapy: myJson});
+                    if(handleLoading){handleLoading()}
                 })
             })
             .catch(err => console.log(err));

@@ -51,29 +51,8 @@ import { deleteInvoice } from "../store/actions/deleteInvoice.js";
 
 const getRowId = row => row.id;
 
-const ViewOnCalendarCell = (props) => {
-  const history = useHistory()
-    return (
-    <Table.Cell {...props} style={{display: 'flex', alignContent: 'center' }}>
-        <IconButton
-          onClick={() => {
-            history.push({
-              pathname: "/calendar",
-              state: {...props.row}
-            })
-          }}
-          title="Ver en Calendario"
-          size="large"
-          disabled={props.disabled}
-        >
-          <OpenInNewIcon/>
-        </IconButton>
-    </Table.Cell>);
-};
-
-
 const EditButton = ({ onExecute }) => (
-    <IconButton onClick={onExecute} title="Edit row" size="large">
+    <IconButton onClick={onExecute} title="Editar cobro" size="large">
       <EditIcon />
     </IconButton>
   );
@@ -82,11 +61,11 @@ const EditButton = ({ onExecute }) => (
     <IconButton
       onClick={() => {
         // eslint-disable-next-line
-        if (window.confirm('Are you sure you want to delete this row?')) {
+        if (window.confirm('¿Está seguro que desea eliminar el cobro?')) {
           onExecute();
         }
       }}
-      title="Delete row"
+      title="Eliminar cobro"
       size="large"
     >
       <DeleteIcon />
@@ -94,31 +73,18 @@ const EditButton = ({ onExecute }) => (
   );
   
   const CommitButton = ({ onExecute }) => (
-    <IconButton onClick={onExecute} title="Save changes" size="large">
+    <IconButton onClick={onExecute} title="Guardar los cambios" size="large">
       <SaveIcon />
     </IconButton>
   );
   
   const CancelButton = ({ onExecute }) => (
-    <IconButton color="secondary" onClick={onExecute} title="Cancel changes" size="large">
+    <IconButton color="secondary" onClick={onExecute} title="Cancelar los cambios" size="large">
       <CancelIcon />
     </IconButton>
   );
 
-  const AddButton = ({ onExecute }) => (
-    <div style={{ textAlign: 'center' }}>
-      <Button
-        color="primary"
-        onClick={onExecute}
-        title="Create new row"
-      >
-        New
-      </Button>
-    </div>
-  );
-
   const commandComponents = {
-    add: AddButton,
     edit: EditButton,
     delete: DeleteButton,
     commit: CommitButton,
@@ -139,19 +105,11 @@ const EditCell = (props) => {
   };
 
 const Cell = (props) => {
-  const { column } = props;
-  if (column.name === 'link') {
-    return <ViewOnCalendarCell {...props} disabled={false}/>
-  }
   return (
   <Table.Cell {...props} />);
 };
 
 const FilterCell = (props) => {
-  const { column } = props;
-  if (column.name === 'link') {
-    return <></>;
-  }
   return <TableFilterRow.Cell {...props} />;
 };
 

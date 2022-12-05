@@ -1,7 +1,7 @@
 export const LOADLOCATIONS = 'LOADLOCATIONS';
 export const LOADTHERAPIES = 'LOADTHERAPIES';
 
-export const loadTherapies = () => {
+export const loadTherapies = (handleLoading) => {
     return (dispatch, getState) => {
         getState().auth.currentUser.getIdToken(true)
             .then(idToken => {
@@ -24,6 +24,7 @@ export const loadTherapies = () => {
                 })
                 .then((myJson) => {
                     dispatch({type:LOADTHERAPIES, therapies: myJson.therapies});
+                    if(handleLoading){handleLoading()}
                 })
             })
             .catch(err => console.log(err));
