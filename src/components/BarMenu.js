@@ -4,13 +4,13 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import Divider from '@mui/material/Divider';
-import PersonAdd from '@mui/icons-material/PersonAdd';
 import Settings from '@mui/icons-material/Settings';
 import PaidIcon from '@mui/icons-material/Paid';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import Logout from '@mui/icons-material/Logout';
 import GroupIcon from '@mui/icons-material/Group';
 import { Link, useHistory } from "react-router-dom"
+import DiscountIcon from '@mui/icons-material/Discount';
 import { auth } from "../firebase"
 import {
     signOut
@@ -50,6 +50,10 @@ export default function BarMenu(props) {
       history.push("/tarifas")
     }
 
+    function handleDiscounts() {
+      history.push("/descuentos")
+    }
+
     var items = (<MenuList>
         <MenuItem>
           <Avatar /> Perfil
@@ -80,6 +84,12 @@ export default function BarMenu(props) {
                 <PaidIcon fontSize="small" />
               </ListItemIcon>
               Administrar Tarifas
+            </MenuItem>
+            <MenuItem onClick={handleDiscounts}>
+              <ListItemIcon>
+                <DiscountIcon fontSize="small" />
+              </ListItemIcon>
+              Administrar Descuentos
             </MenuItem>
             <MenuItem onClick={handleCobros}>
               <ListItemIcon>

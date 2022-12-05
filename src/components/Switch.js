@@ -12,6 +12,7 @@ import ProfessionalCalendar from "./ProfessionalCalendar"
 import NotAsignedHome from "./NotAsignedHome"
 import RateGrid from "./RateGrid"
 import BillGrid from "./BillGrid"
+import DiscountGrid from "./DiscountGrid"
 
 
 
@@ -26,6 +27,7 @@ function AuthSwitch(props) {
             <Route exact path="/usuarios" component={UsersGrid}/>
             <Route exact path="/tarifas" component={RateGrid}/>
             <Route exact path="/cobros" component={BillGrid}/>
+            <Route exact path="/descuentos" component={DiscountGrid}/>
             <Route exact path="/sesiones" component={SessionsGrid}/>
             <Route path="/" component={Home} />
         </Switch>

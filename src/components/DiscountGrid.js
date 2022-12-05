@@ -2,60 +2,39 @@ import React, {useState, useEffect  } from "react"
 import { useDispatch, useSelector } from 'react-redux';
 import Paper from '@mui/material/Paper';
 import {
-    EditingState,
-    PagingState,
-    IntegratedPaging,
-    SearchState,
-    FilteringState,
-    SortingState,
-    IntegratedSorting,
-    IntegratedFiltering,
+  EditingState,
+  PagingState,
+  IntegratedPaging,
+  SearchState,
+  FilteringState,
+  SortingState,
+  IntegratedSorting,
+  IntegratedFiltering,
 } from '@devexpress/dx-react-grid';
 import {
-    Grid,
-    Table,
-    TableHeaderRow,
-    TableEditRow,
-    TableEditColumn,
-    PagingPanel,
-    Toolbar,
-    SearchPanel,
-    TableFilterRow,
-    TableColumnResizing
+  Grid,
+  Table,
+  TableHeaderRow,
+  TableEditRow,
+  TableEditColumn,
+  PagingPanel,
+  Toolbar,
+  SearchPanel,
+  TableFilterRow,
+  TableColumnResizing
 } from '@devexpress/dx-react-grid-material-ui';
-import { loadTherapies } from "../store/actions/resources.js";
+import { loadPatients } from "../store/actions/loadPatients.js";
+import { loadDiscounts } from "../store/actions/loadDiscounts.js";
+import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
-import TableCell from '@mui/material/TableCell';
-import Button from '@mui/material/Button';
-import { styled } from '@mui/material/styles';
-import { updateRate } from "../store/actions/updateRate.js";
+import { Loading } from './Loading/Loading.js';
+import { editRole } from "../store/actions/editRole";import { editDiscount } from "../store/actions/editDiscount.js";
+;
 
-
-const PREFIX = 'Demo';
-const classes = {
-  lookupEditCell: `${PREFIX}-lookupEditCell`,
-  dialog: `${PREFIX}-dialog`,
-  inputRoot: `${PREFIX}-inputRoot`,
-  selectMenu: `${PREFIX}-selectMenu`,
-};
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
-  [`&.${classes.lookupEditCell}`]: {
-    padding: theme.spacing(1),
-  },
-  [`& .${classes.dialog}`]: {
-    width: 'calc(100% - 16px)',
-  },
-  [`& .${classes.inputRoot}`]: {
-    width: '100%',
-  },
-  [`& .${classes.selectMenu}`]: {
-    position: 'absolute !important',
-  },
-}));
 
 const AddButton = ({ onExecute }) => (
   <div style={{ textAlign: 'center' }}>
@@ -119,70 +98,95 @@ const Command = ({ id, onExecute }) => {
   );
 };
 
-const getRowId = row => row.id;
-
-const Cell = (props) => {
-  return (
-  <Table.Cell {...props} />);
-};
 
 const EditCell = (props) => {
     return <TableEditRow.Cell {...props} />;
   };
 
+const Cell = (props) => {
+  return <Table.Cell {...props} />;
+};
+
 const FilterCell = (props) => {
   return <TableFilterRow.Cell {...props} />;
 };
 
-export default function RateGrid(props) {
+
+const getRowId = row => row.id;
+
+export default function DiscountGrid(props) {
   const [columns] = useState([
-    { name: 'name', title: 'Terapia' },
-    { name: 'rate', title: 'Precio ($/hs)' }
+    { name: 'name', title: 'Nombre' },
+    { name: 'discount', title: 'Descuento sobre tarifa (%)' },
   ]);
-  const therapies = useSelector(state => state.resource.therapies);
+  const [rows, setRows] = useState([]);
+  const patients = useSelector(state => state.user.patients);
+  const discounts = useSelector(state => state.billing.discounts);
+  const [editingStateColumnExtensions] = useState([
+    { columnName: 'name', editingEnabled: false },
+  ]);
   const [pageSize, setPageSize] = useState(0);
   const [pageSizes] = useState([5, 10, 0]);
   const dispatch = useDispatch();
-  const [editingStateColumnExtensions] = useState([
-    { columnName: 'name', editingEnabled: false }
-  ]);
-
-  const [columnWidths, setColumnWidths] = useState([
-    { columnName: 'name', width: window.innerWidth/(columns.length + 1.5)},
-    { columnName: 'rate', width: window.innerWidth/(columns.length + 1.5) }
-  ])
-
-  console.log('terapias, ',therapies)
+  const [loading, setLoading] = useState(false);
 
   const commitChanges = (action) => {
     console.log(action)
     if(action.changed){
-        console.log('q',Object.values(action.changed)[0])
-       if(Object.values(action.changed)[0]){
-            const id = Object.keys(action.changed)[0];
-            const rate = Object.values(action.changed)[0].rate;
-            const therapy = {
-                id,
-                rate
-            }
-            console.log('changed, ', therapy)
-            dispatch(updateRate(therapy))
+        if(Object.values(action.changed)[0].discount){
+            console.log('dispatch')
+            
+            setLoading(true)
+            dispatch(editDiscount(action, handleLoading))
         }
     }
     //setRows(changedRows);
   };
 
+  const handleLoading = () => {
+    setLoading(false)
+  };
+
+  const handleDiscountsToRows = () => {
+    setRows(() => {
+        return patients.map((patient) => { 
+            const discount = discounts.find(x => x.patient === patient.id)
+            return {
+                name: patient ? patient.name : '',
+                discount: discount ? discount.rate : 0,
+                id: patient ? patient.id : new Date().getMilliseconds()
+            }
+        })
+    })
+  }
+
   useEffect(() => {
-    dispatch(loadTherapies())
+    handleDiscountsToRows()
+    console.log(discounts)
+  }, [patients, discounts]);
+
+  useEffect(() => {
+    setLoading(true)
+    dispatch(loadDiscounts())
+    dispatch(loadPatients(handleLoading))
   }, []);
+
+  const [columnWidths, setColumnWidths] = useState([
+    { columnName: 'name', width: window.innerWidth/(columns.length + 1.5)},
+    { columnName: 'discount', width: window.innerWidth/(columns.length + 1.5) }
+  ])
+
+  /*useEffect(() => {
+    setRows(data);
+    console.log('setRows')
+    setLoading(false)
+  }, [data]);*/
 
   useEffect(() => {
     function handleWindowResize() {
-      setColumnWidths(
-        [
-            { columnName: 'name', width: window.innerWidth/(columns.length + 1.5)},
-            { columnName: 'rate', width: window.innerWidth/(columns.length + 1.5) }
-        ]);
+      setColumnWidths([
+        { columnName: 'name', width: window.innerWidth/(columns.length + 1.5)},
+        { columnName: 'discount', width: window.innerWidth/(columns.length + 1.5) }]);
     }
 
     window.addEventListener('resize', handleWindowResize);
@@ -195,7 +199,7 @@ export default function RateGrid(props) {
   return (
     <Paper>
       <Grid
-        rows={therapies}
+        rows={rows}
         locale='es-ES'
         columns={columns}
         getRowId={getRowId}
@@ -217,7 +221,7 @@ export default function RateGrid(props) {
           defaultSorting={[]}
         />
         <IntegratedSorting />
-        <Table
+        <Table 
           cellComponent={Cell}
         />
         <TableColumnResizing
@@ -230,7 +234,6 @@ export default function RateGrid(props) {
         />
         <TableEditColumn
             showEditCommand
-
             commandComponent={Command}
         />
         <Toolbar />
@@ -242,6 +245,7 @@ export default function RateGrid(props) {
           cellComponent={FilterCell}
         />
       </Grid>
+      {loading && <Loading />}
     </Paper>
   );
 };

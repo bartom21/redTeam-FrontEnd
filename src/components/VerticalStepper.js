@@ -9,30 +9,91 @@ import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect } from 'react';
-import { Autocomplete, TextField } from '@mui/material';
+import { Autocomplete, TextField, Tooltip } from '@mui/material';
 import { useState } from 'react';
 import { loadUnpaidSessions } from '../store/actions/loadUnpaidSessions';
 import { DataGrid } from '@mui/x-data-grid';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
-import { gridColumnsTotalWidthSelector } from '@mui/x-data-grid/hooks/features/columns';
 import { addInvoice } from '../store/actions/addInvoice';
+import { loadPatients } from '../store/actions/loadPatients';
+import { editInvoice } from '../store/actions/editInvoice';
+import { Loading } from './Loading/Loading.js';
+
+
+function renderCellExpand(params) {
+  return (
+    <Tooltip title={params.value || ''} arrow>
+      <Typography variant="body2">{params.value || ''}</Typography>
+    </Tooltip>
+  );
+}
+
+const columns = [
+  {
+    field: 'title',
+    headerName: 'Titulo',
+    width: 180,
+    editable: false,
+    sortable: false,
+    renderCell: renderCellExpand,
+  },
+  {
+    field: 'therapy',
+    headerName: 'Terapia',
+    type: 'string',
+    width: 180,
+    editable: false,
+    sortable: false,
+    renderCell: renderCellExpand,
+  },
+  {
+    field: 'startDate',
+    headerName: 'Fecha de inicio',
+    width: 150,
+    editable: false,
+    sortable: false,
+    renderCell: renderCellExpand,
+  },
+  {
+    field: 'endDate',
+    headerName: 'Fecha de Fin',
+    type: 'date',
+    width: 180,
+    editable: false,
+    sortable: false,
+    renderCell: renderCellExpand,
+  },
+  {
+    field: 'amount',
+    headerName: 'Monto (ARS$)',
+    width: 100,
+    editable: false,
+    sortable: false,
+    renderCell: renderCellExpand,
+  },
+  
+];
+
 
 
 
 export default function VerticalLinearStepper(props) {
   const [activeStep, setActiveStep] = React.useState(0);
-  const [value, setValue] = useState(props.patients.length > 0 ? props.patients[0] : '');
+  const [value, setValue] = useState(props.editing ? props.editedRow.patientObj : (props.patients.length > 0 ? props.patients[0] : ''));
   const unpaidSessions = useSelector(state => state.billing.unpaidSessions);
   const [selectionModel, setSelectionModel] = useState([]);
   const [invoice, setInvoice] = useState(null)
   const [rows, setRows] = useState([])
+  const [loading, setLoading] = useState(false);
+  const patients = useSelector(state => state.user.patients)
   const dispatch = useDispatch()
-
+  console.log('editedRow, ',props.editedRow)
   const handleNext = () => {
     //console.log('STEP: ',activeStep)
     if(activeStep === 0 && value){
-      const sessions = unpaidSessions
+      console.log('value ',value)
+      let sessions = unpaidSessions
                           .filter((x) => x.patient===value.id)
                           .map((session) => {
                             const startDate = new Date(session.startDate).toLocaleDateString('en-GB').concat(' ', new Date(session.startDate).toLocaleTimeString());
@@ -43,24 +104,42 @@ export default function VerticalLinearStepper(props) {
                                 endDate
                             }
                         })
-      
+      if(props.editing && value.id === props.editedRow.patientObj.id){
+        sessions = sessions.concat(props.editedRow.sessions)
+        setSelectionModel(props.editedRow.sessions.map(x => x.id));
+      }
       setRows(sessions)
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
     }
     if(activeStep === 1 && selectionModel.length > 0){
-      console.log('reduce ',selectionModel.map(item => item.amount).reduce((prev, next) => prev + next))
+      //console.log('reduce ',selectionModel.map(item => item.amount).reduce((prev, next) => prev + next))
+      let newSessions = []
+      if(props.editing){
+        newSessions = unpaidSessions.concat(props.editedRow.sessions).filter((x)=> selectionModel.includes(x.id))
+      }else{
+        newSessions = unpaidSessions.filter((x)=> selectionModel.includes(x.id))
+      }
       setInvoice({
         date: new Date().toISOString(),
-        sessions: unpaidSessions.filter((x)=> selectionModel.includes(x.id)),
+        sessions: newSessions,
         patient: value.id
       })
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
     }
     if(activeStep === 2){
       console.log('invoice: ', invoice)
-      dispatch(addInvoice(invoice))
+      if(props.editing){
+        console.log({invoice, oldInvoice: props.editedRow})
+        dispatch(editInvoice({invoice, oldInvoice: props.editedRow}))
+      }else{
+        dispatch(addInvoice(invoice))
+      }
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
     }
+  };
+
+  const handleLoading = () => {
+    setLoading(false)
   };
 
   const handleBack = () => {
@@ -72,50 +151,20 @@ export default function VerticalLinearStepper(props) {
     setValue(null)
     setRows([])
     setInvoice(null)
-    dispatch(loadUnpaidSessions())
+    setLoading(true)
+    dispatch(loadUnpaidSessions(handleLoading))
   };
 
   useEffect(() => {
-    dispatch(loadUnpaidSessions())
+    setLoading(true)
+    dispatch(loadUnpaidSessions(handleLoading))
+    if(props.editing){dispatch(loadPatients())}
   }, []);
 
   useEffect(() => {
     console.log(value)
   }, [value]);
 
-const columns = [
-  {
-    field: 'title',
-    headerName: 'Titulo',
-    width: 150,
-    editable: false,
-    sortable: false
-  },
-  {
-    field: 'startDate',
-    headerName: 'Fecha de inicio',
-    type: 'date',
-    width: 150,
-    editable: false,
-    sortable: false
-  },
-  {
-    field: 'endDate',
-    headerName: 'Fecha de Fin',
-    type: 'date',
-    width: 110,
-    editable: true,
-    sortable: false
-  },
-  {
-    field: 'amount',
-    headerName: 'Monto (ARS$)',
-    width: 110,
-    editable: true,
-    sortable: false
-  },
-  
-];
 
 const unpaidSessionsGrid = (
     <Box sx={{ height: 400, width: 500 }}>
@@ -141,7 +190,7 @@ const unpaidSessionsGrid = (
       <Autocomplete
         disablePortal
         id="combo-box-demo"
-        options={props.patients}
+        options={props.editing ? patients : props.patients}
         fullWidth
         sx={{mt:1}}
         value={value}
@@ -219,7 +268,7 @@ const unpaidSessionsGrid = (
           </Step>
         ))}
       </Stepper>
-      {activeStep === steps.length && (
+      {activeStep === steps.length && !props.editing && (
         <Paper square elevation={0} sx={{ p: 3 }}>
           <Typography>Cobro creado con éxito</Typography>
           <Button onClick={handleReset} sx={{ mt: 1, mr: 1 }}>
@@ -227,6 +276,15 @@ const unpaidSessionsGrid = (
           </Button>
         </Paper>
       )}
+      {activeStep === steps.length && props.editing && (
+        <Paper square elevation={0} sx={{ p: 3 }}>
+          <Typography>Cobro Editado con éxito</Typography>
+          <Button onClick={props.onClose} sx={{ mt: 1, mr: 1 }}>
+            Salir
+          </Button>
+        </Paper>
+      )}
+      {loading && <Loading />}
     </Box>
   );
 }

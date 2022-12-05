@@ -1,6 +1,6 @@
 export const LOADUNPAIDSESSIONS = 'LOADUNPAIDSESSIONS';
 
-export const loadUnpaidSessions = () => {
+export const loadUnpaidSessions = (handleLoading) => {
     return (dispatch, getState) => {
         getState().auth.currentUser.getIdToken(true)
             .then(idToken => {
@@ -24,6 +24,7 @@ export const loadUnpaidSessions = () => {
                 .then((myJson) => {
                     console.log(myJson);
                     dispatch({type:LOADUNPAIDSESSIONS, unpaidSessions: myJson.appointments});
+                    handleLoading()
                 })
             })
             .catch(err => console.log(err));

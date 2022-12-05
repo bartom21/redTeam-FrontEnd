@@ -1,15 +1,21 @@
-export const LOADPATIENTS = 'LOADPATIENTS';
 
-export const loadPatients = (handleLoading) => {
+export const EDITDISCOUNT = 'EDITDISCOUNT';
+
+export const editDiscount = (event, handleLoading) => {
+    console.log("editAppointment");
     return (dispatch, getState) => {
+        const id = Object.keys(event.changed)[0];
         getState().auth.currentUser.getIdToken(true)
             .then(idToken => {
-                fetch('https://back-red-team.vercel.app/usersByRole/paciente', {
-                    method: 'GET',
+                fetch(`https://back-red-team.vercel.app/discount/${id}`, {
+                    method: 'PUT',
                     headers: {
                     "Content-Type": "application/json",
                     "Authorization": idToken
-                    }
+                    },
+                    body: JSON.stringify({
+                    ...event.changed[id]
+                    })
                 })
                 .then((response) => {
                     console.log('RESPONSE');
@@ -22,9 +28,9 @@ export const loadPatients = (handleLoading) => {
                     return response.json();
                 })
                 .then((myJson) => {
+                    handleLoading()
                     console.log(myJson);
-                    dispatch({type:LOADPATIENTS, users: myJson.users});
-                    if(handleLoading){handleLoading()}
+                    dispatch({type:EDITDISCOUNT, discount: myJson.discount});
                 })
             })
             .catch(err => console.log(err));

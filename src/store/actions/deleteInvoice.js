@@ -1,15 +1,18 @@
-export const LOADPATIENTS = 'LOADPATIENTS';
+import { LOADINVOICES } from "./loadInvoices";
 
-export const loadPatients = (handleLoading) => {
+
+
+export const deleteInvoice = (event, handleLoading) => {
     return (dispatch, getState) => {
+        const invoiceId = event.deleted;
         getState().auth.currentUser.getIdToken(true)
             .then(idToken => {
-                fetch('https://back-red-team.vercel.app/usersByRole/paciente', {
-                    method: 'GET',
+                fetch(`https://back-red-team.vercel.app/deleteInvoice/${invoiceId}`, {
+                    method: 'PUT',
                     headers: {
                     "Content-Type": "application/json",
                     "Authorization": idToken
-                    }
+                    },
                 })
                 .then((response) => {
                     console.log('RESPONSE');
@@ -23,8 +26,8 @@ export const loadPatients = (handleLoading) => {
                 })
                 .then((myJson) => {
                     console.log(myJson);
-                    dispatch({type:LOADPATIENTS, users: myJson.users});
-                    if(handleLoading){handleLoading()}
+                    dispatch({type:LOADINVOICES, invoices: myJson.invoices});
+                    handleLoading()
                 })
             })
             .catch(err => console.log(err));

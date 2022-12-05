@@ -1,10 +1,10 @@
-export const LOADPATIENTS = 'LOADPATIENTS';
+export const LOADDISCOUNTS = 'LOADDISCOUNTS';
 
-export const loadPatients = (handleLoading) => {
+export const loadDiscounts = () => {
     return (dispatch, getState) => {
         getState().auth.currentUser.getIdToken(true)
             .then(idToken => {
-                fetch('https://back-red-team.vercel.app/usersByRole/paciente', {
+                fetch('https://back-red-team.vercel.app/discounts', {
                     method: 'GET',
                     headers: {
                     "Content-Type": "application/json",
@@ -23,8 +23,7 @@ export const loadPatients = (handleLoading) => {
                 })
                 .then((myJson) => {
                     console.log(myJson);
-                    dispatch({type:LOADPATIENTS, users: myJson.users});
-                    if(handleLoading){handleLoading()}
+                    dispatch({type:LOADDISCOUNTS, discounts: myJson.discounts});
                 })
             })
             .catch(err => console.log(err));

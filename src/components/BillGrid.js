@@ -2,6 +2,7 @@ import React, {useState, useEffect  } from "react"
 import { useDispatch, useSelector } from 'react-redux';
 import Paper from '@mui/material/Paper';
 import {
+    EditingState,
   PagingState,
   IntegratedPaging,
   SearchState,
@@ -12,10 +13,15 @@ import {
   RowDetailState
 } from '@devexpress/dx-react-grid';
 import {
+    Plugin, Template, TemplateConnector, TemplatePlaceholder,
+  } from '@devexpress/dx-react-core';
+import {
   Grid,
   Table,
   TableHeaderRow,
   PagingPanel,
+  TableEditRow,
+  TableEditColumn,
   Toolbar,
   SearchPanel,
   TableFilterRow,
@@ -23,6 +29,11 @@ import {
   TableRowDetail
 } from '@devexpress/dx-react-grid-material-ui';
 import { Loading } from './Loading/Loading.js';
+import Button from '@mui/material/Button';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import SaveIcon from '@mui/icons-material/Save';
+import CancelIcon from '@mui/icons-material/Cancel';
 import IconButton from '@mui/material/IconButton';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { useHistory } from "react-router-dom";
@@ -36,7 +47,7 @@ import DialogContent from '@mui/material/DialogContent';
 import { loadInvocies } from "../store/actions/loadInvoices.js";
 import Typography from "./Typography.js";
 import { loadPatients } from "../store/actions/loadPatients.js";
-
+import { deleteInvoice } from "../store/actions/deleteInvoice.js";
 
 const getRowId = row => row.id;
 
@@ -61,6 +72,72 @@ const ViewOnCalendarCell = (props) => {
 };
 
 
+const EditButton = ({ onExecute }) => (
+    <IconButton onClick={onExecute} title="Edit row" size="large">
+      <EditIcon />
+    </IconButton>
+  );
+  
+  const DeleteButton = ({ onExecute }) => (
+    <IconButton
+      onClick={() => {
+        // eslint-disable-next-line
+        if (window.confirm('Are you sure you want to delete this row?')) {
+          onExecute();
+        }
+      }}
+      title="Delete row"
+      size="large"
+    >
+      <DeleteIcon />
+    </IconButton>
+  );
+  
+  const CommitButton = ({ onExecute }) => (
+    <IconButton onClick={onExecute} title="Save changes" size="large">
+      <SaveIcon />
+    </IconButton>
+  );
+  
+  const CancelButton = ({ onExecute }) => (
+    <IconButton color="secondary" onClick={onExecute} title="Cancel changes" size="large">
+      <CancelIcon />
+    </IconButton>
+  );
+
+  const AddButton = ({ onExecute }) => (
+    <div style={{ textAlign: 'center' }}>
+      <Button
+        color="primary"
+        onClick={onExecute}
+        title="Create new row"
+      >
+        New
+      </Button>
+    </div>
+  );
+
+  const commandComponents = {
+    add: AddButton,
+    edit: EditButton,
+    delete: DeleteButton,
+    commit: CommitButton,
+    cancel: CancelButton,
+  };
+  
+  const Command = ({ id, onExecute }) => {
+    const CommandButton = commandComponents[id];
+    return (
+      <CommandButton
+        onExecute={onExecute}
+      />
+    );
+  };
+
+const EditCell = (props) => {
+    return <TableEditRow.Cell {...props} />;
+  };
+
 const Cell = (props) => {
   const { column } = props;
   if (column.name === 'link') {
@@ -82,10 +159,18 @@ const RowDetail = ({ row }) => {
     const [rows, setRows] = useState([]);
     const [columns] = useState([
         { name: 'title', title: 'Titulo' },
+        { name: 'therapy', title: 'Terapia' },
         { name: 'startDate', title: 'Fecha de inicio' },
         { name: 'endDate', title: 'Fecha de fin' },
         { name: 'amount', title: 'Monto (ARS$)' }
       ]);
+      const [columnWidths, setColumnWidths] = useState(
+        [{ columnName: 'title', width: window.innerWidth/(columns.length) },
+        { columnName: 'therapy', width: window.innerWidth/(columns.length )},
+        { columnName: 'startDate', width: window.innerWidth/(columns.length)},
+        { columnName: 'endDate', width: window.innerWidth/(columns.length)},
+        { columnName: 'amount', width: window.innerWidth/(columns.length)}
+      ])
     
     const handleSessionsToRows = () => {
         setRows(() => {
@@ -102,6 +187,24 @@ const RowDetail = ({ row }) => {
       }
 
       useEffect(() => {
+        function handleWindowResize() {
+          setColumnWidths(
+            [{ columnName: 'title', width: window.innerWidth/(columns.length) },
+            { columnName: 'therapy', width: window.innerWidth/(columns.length )},
+            { columnName: 'startDate', width: window.innerWidth/(columns.length)},
+            { columnName: 'endDate', width: window.innerWidth/(columns.length)},
+            { columnName: 'amount', width: window.innerWidth/(columns.length)}
+        ]);
+        }
+    
+        window.addEventListener('resize', handleWindowResize);
+    
+        return () => {
+          window.removeEventListener('resize', handleWindowResize);
+        };
+      }, []);
+
+      useEffect(() => {
         handleSessionsToRows()
       }, []);
 
@@ -114,11 +217,109 @@ const RowDetail = ({ row }) => {
                 columns={columns}
             >
             <Table />
+            <TableColumnResizing
+                columnWidths={columnWidths}
+                onColumnWidthsChange={setColumnWidths}
+            />
             <TableHeaderRow />
             </Grid>
       </Paper>
       </>
      )};
+
+     const Popup = ({
+        row,
+        onChange,
+        onApplyChanges,
+        onCancelChanges,
+        open,
+      }) => (
+        <Dialog open={open} onClose={onCancelChanges}>
+        <DialogTitle>Editar cobro a paciente</DialogTitle>
+        <DialogContent>
+            <VerticalLinearStepper patients={[]} editing={true} editedRow={row} onClose={onCancelChanges}></VerticalLinearStepper>
+        </DialogContent>
+    </Dialog>
+      );
+
+     const PopupEditing = React.memo(({ popupComponent: Popup }) => (
+        <Plugin>
+          <Template name="popupEditing">
+            <TemplateConnector>
+              {(
+                {
+                  rows,
+                  getRowId,
+                  addedRows,
+                  editingRowIds,
+                  createRowChange,
+                  rowChanges,
+                },
+                {
+                  changeRow, changeAddedRow, commitChangedRows, commitAddedRows,
+                  stopEditRows, cancelAddedRows, cancelChangedRows,
+                },
+              ) => {
+                const isNew = addedRows.length > 0;
+                let editedRow;
+                let rowId;
+                if (isNew) {
+                  rowId = 0;
+                  editedRow = addedRows[rowId];
+                } else {
+                  [rowId] = editingRowIds;
+                  const targetRow = rows.filter(row => getRowId(row) === rowId)[0];
+                  editedRow = { ...targetRow, ...rowChanges[rowId] };
+                }
+      
+                const processValueChange = ({ target: { name, value } }) => {
+                  const changeArgs = {
+                    rowId,
+                    change: createRowChange(editedRow, value, name),
+                  };
+                  if (isNew) {
+                    changeAddedRow(changeArgs);
+                  } else {
+                    changeRow(changeArgs);
+                  }
+                };
+                const rowIds = isNew ? [0] : editingRowIds;
+                const applyChanges = () => {
+                  if (isNew) {
+                    commitAddedRows({ rowIds });
+                  } else {
+                    stopEditRows({ rowIds });
+                    commitChangedRows({ rowIds });
+                  }
+                };
+                const cancelChanges = () => {
+                  if (isNew) {
+                    cancelAddedRows({ rowIds });
+                  } else {
+                    stopEditRows({ rowIds });
+                    cancelChangedRows({ rowIds });
+                  }
+                };
+      
+                const open = editingRowIds.length > 0 || isNew;
+                return (
+                  <Popup
+                    open={open}
+                    row={editedRow}
+                    onChange={processValueChange}
+                    onApplyChanges={applyChanges}
+                    onCancelChanges={cancelChanges}
+                  />
+                );
+              }}
+            </TemplateConnector>
+          </Template>
+          <Template name="root">
+            <TemplatePlaceholder />
+            <TemplatePlaceholder name="popupEditing" />
+          </Template>
+        </Plugin>
+      ));
 
 export default function BillGrid(props) {
   const [columns] = useState([
@@ -137,10 +338,16 @@ export default function BillGrid(props) {
   const patients = useSelector(state => state.user.patients);
 
   const [columnWidths, setColumnWidths] = useState([
-    { columnName: 'patient', width: window.innerWidth/columns.length },
-    { columnName: 'creationDate', width: window.innerWidth/columns.length},
-    { columnName: 'amount', width: window.innerWidth/columns.length }
+    { columnName: 'patient', width: window.innerWidth/ (columns.length + 1.5) },
+    { columnName: 'creationDate', width: window.innerWidth/(columns.length + 1.5)},
+    { columnName: 'amount', width: window.innerWidth/(columns.length + 1.5) }
   ])
+
+  const [editingStateColumnExtensions] = useState([
+    { columnName: 'patient', editingEnabled: false },
+    { columnName: 'creationDate', editingEnabled: false },
+    { columnName: 'amount', editingEnabled: false }
+  ]);
 
   const handleLoading = () => {
     setLoading(false)
@@ -162,12 +369,31 @@ export default function BillGrid(props) {
             const creationDate = new Date(invoice.creationDate).toLocaleDateString('en-GB').concat(' ', new Date(invoice.creationDate).toLocaleTimeString());
             return {
                 ...invoice,
+                patientObj: patient ? patient : {},
                 patient: patient ? patient.name : '',
-                creationDate
+                creationDate,
+                date: invoice.creationDate
             }
         })
     })
   }
+
+  const commitChanges = (action) => {
+    console.log(action)
+    if(action.changed){
+        /*if(Object.values(action.changed)[0].role){
+            console.log('dispatch')
+            setLoading(true)
+            dispatch(editRole(action, handleLoading))
+        }*/
+    }
+    if(action.deleted){
+        console.log('DELETED')
+        setLoading(true)
+        dispatch(deleteInvoice(action, handleLoading))
+    }
+    //setRows(changedRows);
+  };
 
   useEffect(() => {
     setLoading(true)
@@ -182,9 +408,9 @@ export default function BillGrid(props) {
   useEffect(() => {
     function handleWindowResize() {
       setColumnWidths(
-        [{ columnName: 'patient', width: window.innerWidth/columns.length },
-        { columnName: 'creationDate', width: window.innerWidth/columns.length},
-        { columnName: 'amount', width: window.innerWidth/columns.length }]);
+        [{ columnName: 'patient', width: window.innerWidth/(columns.length + 1.5) },
+        { columnName: 'creationDate', width: window.innerWidth/(columns.length + 1.5)},
+        { columnName: 'amount', width: window.innerWidth/(columns.length + 1.5)}]);
     }
 
     window.addEventListener('resize', handleWindowResize);
@@ -211,6 +437,10 @@ export default function BillGrid(props) {
         <FilteringState defaultFilters={[]} />
         <IntegratedFiltering />
         <IntegratedPaging />
+        <EditingState
+          onCommitChanges={commitChanges}
+          columnExtensions={editingStateColumnExtensions}
+        />
         <SortingState
           defaultSorting={[]}
         />
@@ -226,6 +456,14 @@ export default function BillGrid(props) {
           onColumnWidthsChange={setColumnWidths}
         />
         <TableHeaderRow showSortingControls />
+        <TableEditRow
+          cellComponent={EditCell}
+        />
+        <TableEditColumn
+            showEditCommand
+            showDeleteCommand
+            commandComponent={Command}
+        />
         <Toolbar />
         <PagingPanel
           pageSizes={pageSizes}
@@ -237,6 +475,7 @@ export default function BillGrid(props) {
         <TableRowDetail
           contentComponent={RowDetail}
         />
+        <PopupEditing popupComponent={Popup} />
       </Grid>
       {loading && <Loading />}
     </Paper>
@@ -248,7 +487,7 @@ export default function BillGrid(props) {
     <Dialog open={open} onClose={handleCloseDialog}>
         <DialogTitle>Crear cobro a paciente</DialogTitle>
         <DialogContent>
-            <VerticalLinearStepper patients={patients}></VerticalLinearStepper>
+            <VerticalLinearStepper patients={patients} editing={false}></VerticalLinearStepper>
         </DialogContent>
     </Dialog>
     </>
