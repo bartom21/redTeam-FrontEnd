@@ -36,6 +36,7 @@ const columns = [
     width: 180,
     editable: false,
     sortable: false,
+    hideable: false,
     renderCell: renderCellExpand,
   },
   {
@@ -45,6 +46,7 @@ const columns = [
     width: 180,
     editable: false,
     sortable: false,
+    hideable: false,
     renderCell: renderCellExpand,
   },
   {
@@ -53,6 +55,7 @@ const columns = [
     width: 150,
     editable: false,
     sortable: false,
+    hideable: false,
     renderCell: renderCellExpand,
   },
   {
@@ -62,6 +65,7 @@ const columns = [
     width: 180,
     editable: false,
     sortable: false,
+    hideable: false,
     renderCell: renderCellExpand,
   },
   {
@@ -70,6 +74,7 @@ const columns = [
     width: 100,
     editable: false,
     sortable: false,
+    hideable: false,
     renderCell: renderCellExpand,
   },
   
@@ -181,7 +186,7 @@ const unpaidSessionsGrid = (
         pageSize={5}
         rowsPerPageOptions={[5]}
         checkboxSelection
-        disableSelectionOnClick      
+        disableSelectionOnClick     
         onSelectionModelChange={(newSelectionModel) => {
           setSelectionModel(newSelectionModel);
           console.log('Selected rows: ', newSelectionModel)

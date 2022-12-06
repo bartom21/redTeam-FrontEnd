@@ -88,8 +88,8 @@ const requiredRule = {
     errorText: 'Este campo debe contener solo números',
   };
   const percentageRule = {
-    isValid: value => value ? (value > 0 && value < 100) : false,
-    errorText: 'El valor debe ser un porcentaje dentro del rango (0,100)',
+    isValid: value => value ? (value >= 0 && value < 100) : false,
+    errorText: 'El valor debe ser un porcentaje dentro del rango [0,100)',
   };
   const validationRules = {
     discount: [requiredRule, numberRule, percentageRule],
