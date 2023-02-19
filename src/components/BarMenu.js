@@ -4,10 +4,11 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import Divider from '@mui/material/Divider';
-import PersonAdd from '@mui/icons-material/PersonAdd';
 import Settings from '@mui/icons-material/Settings';
 import Logout from '@mui/icons-material/Logout';
 import GroupIcon from '@mui/icons-material/Group';
+import PaidIcon from '@mui/icons-material/Paid';
+import ReceiptIcon from '@mui/icons-material/Receipt';
 import { Link, useHistory } from "react-router-dom"
 import { auth } from "../firebase"
 import {
@@ -40,6 +41,14 @@ export default function BarMenu(props) {
         history.push("/usuarios")
     }
 
+    function handleCobros() {
+      history.push("/cobros")
+    }
+
+    function handleSalas() {
+      history.push("/salas")
+    }
+
     var items = (<MenuList>
         <MenuItem>
           <Avatar /> Perfil
@@ -65,6 +74,20 @@ export default function BarMenu(props) {
               </ListItemIcon>
               Administar Usuarios
             </MenuItem>
+            <Divider />
+            <MenuItem onClick={handleSalas}>
+              <ListItemIcon>
+                <PaidIcon fontSize="small" />
+              </ListItemIcon>
+              Administrar Salas
+            </MenuItem>
+            <MenuItem onClick={handleCobros}>
+              <ListItemIcon>
+                <ReceiptIcon fontSize="small" />
+              </ListItemIcon>
+              Registro de Pagos
+            </MenuItem>
+            <Divider />
             <MenuItem>
               <ListItemIcon>
                 <Settings fontSize="small" />

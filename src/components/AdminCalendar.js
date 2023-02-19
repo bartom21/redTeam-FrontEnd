@@ -17,12 +17,19 @@ import {
   TodayButton,
   ConfirmationDialog
 } from '@devexpress/dx-react-scheduler-material-ui';
+
+import { connectProps } from '@devexpress/dx-react-core';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
+
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { Autocomplete, Chip, Tooltip } from '@mui/material';
 import TextField from '@mui/material/TextField';
-import { ViewState, EditingState} from '@devexpress/dx-react-scheduler';
+
+import { ViewState, EditingState, GroupingState, IntegratedGrouping} from '@devexpress/dx-react-scheduler';
+
 import Diversity2Icon from '@mui/icons-material/Diversity2';
 import EscalatorWarningIcon from '@mui/icons-material/EscalatorWarning';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
@@ -86,6 +93,31 @@ const classes = {
   header: `${PREFIX}-header`,
   layout: `${PREFIX}-layout`,
   commandButton: `${PREFIX}-commandButton`,
+  flexibleSpace: `${PREFIX}-flexibleSpace`,
+  prioritySelector: `${PREFIX}-prioritySelector`,
+  content: `${PREFIX}-content`,
+  contentContainer: `${PREFIX}-contentContainer`,
+  text: `${PREFIX}-text`,
+  title: `${PREFIX}-title`,
+  icon: `${PREFIX}-icon`,
+  contentItemIcon: `${PREFIX}-contentItemIcon`,
+  grayIcon: `${PREFIX}-grayIcon`,
+  colorfulContent: `${PREFIX}-colorfulContent`,
+  lens: `${PREFIX}-lens`,
+  textCenter: `${PREFIX}-textCenter`,
+  dateAndTitle: `${PREFIX}-dateAndTitle`,
+  titleContainer: `${PREFIX}-titleContainer`,
+  container: `${PREFIX}-container`,
+  bullet: `${PREFIX}-bullet`,
+  prioritySelectorItem: `${PREFIX}-prioritySelectorItem`,
+  priorityText: `${PREFIX}-priorityText`,
+  priorityShortText: `${PREFIX}-priorityShortText`,
+  cellLowPriority: `${PREFIX}-cellLowPriority`,
+  cellMediumPriority: `${PREFIX}-cellMediumPriority`,
+  cellHighPriority: `${PREFIX}-cellHighPriority`,
+  headerCellLowPriority: `${PREFIX}-headerCellLowPriority`,
+  headerCellMediumPriority: `${PREFIX}-headerCellMediumPriority`,
+  headerCellHighPriority: `${PREFIX}-headerCellHighPriority`
 };
 
 const StyledAppointmentTooltipHeader = styled(AppointmentTooltip.Header)(() => ({
@@ -151,12 +183,124 @@ const getClassByLocation = (classes, location) => {
 };
 
 
+const StyledFormControl = styled(FormControl)(({ theme: { spacing } }) => ({
+  [`&.${classes.prioritySelector}`]: {
+    minWidth: 140,
+    marginLeft: spacing(2),
+    '@media (max-width: 500px)': {
+      minWidth: 0,
+      fontSize: '0.75rem',
+      marginLeft: spacing(0.5),
+    },
+  },
+}));
+
+
+
+// filterTasks
+const filterAppointmentsByLocation = (appointments, location) => {
+  console.log("ES ACA ES ACAAAA",location.id, appointments)
+  return appointments.filter(appointment => (
+  !location.id || appointment.location === location.id
+))};
+
+const StyledToolbarFlexibleSpace = styled(Toolbar.FlexibleSpace)(() => ({
+  [`&.${classes.flexibleSpace}`]: {
+    margin: '0 auto 0 0',
+  },
+}));
+
+const StyledPrioritySelectorItem = styled('div')(({ theme: { palette, spacing }, color }) => ({
+  [`& .${classes.bullet}`]: {
+    backgroundColor: color ? color[400] : palette.divider,
+    borderRadius: '50%',
+    width: spacing(2),
+    height: spacing(2),
+    marginRight: spacing(2),
+    display: 'inline-block',
+  },
+  [`&.${classes.prioritySelectorItem}`]: {
+    display: 'flex',
+    alignItems: 'center',
+  },
+  [`& .${classes.priorityText}`]: {
+    '@media (max-width: 500px)': {
+      display: 'none',
+    },
+  },
+  [`& .${classes.priorityShortText}`]: {
+    '@media (min-width: 500px)': {
+      display: 'none',
+    },
+  },
+}));
+
+
+const PrioritySelectorItem = ({
+  color, text: resourceTitle,
+}) => {
+  const text = resourceTitle || 'All Tasks';
+  const shortText = resourceTitle ? text.substring(0, 1) : 'All';
+  return (
+    <StyledPrioritySelectorItem className={classes.prioritySelectorItem} color={color}>
+      <span className={classes.bullet} />
+      <span className={classes.priorityText}>{text}</span>
+      <span className={classes.priorityShortText}>{shortText}</span>
+    </StyledPrioritySelectorItem>
+  );
+};
+
+const PrioritySelector = ({
+  location, locations, locationChange
+}) => {
+  console.log("Location y locations PrioritySelect",location, locations)
+  return (
+    <StyledFormControl className={classes.prioritySelector} variant="standard">
+      <Select
+        disableUnderline
+        value={location}
+        onChange={(e) => {
+          console.log(e)
+          locationChange(e.target.value);
+        }}
+        renderValue={() => (
+          <PrioritySelectorItem text={location.text} color={location.color} />
+        )}
+      >
+        <MenuItem value={0}>
+          <PrioritySelectorItem />
+        </MenuItem>
+        {locations.map((loc) => {
+          console.log(loc)
+          return (
+          <MenuItem value={loc} key={loc.id.toString()}>
+            <PrioritySelectorItem color={loc.color} text={loc.text} />
+          </MenuItem>)}
+        )}
+      </Select>
+    </StyledFormControl>
+  );
+};
+
+const FlexibleSpace = (({
+  location, locations, locationChange, ...restProps
+}) => (
+  <StyledToolbarFlexibleSpace {...restProps} className={classes.flexibleSpace}>
+    <PrioritySelector location={location} locations={locations} locationChange={locationChange} />
+  </StyledToolbarFlexibleSpace>
+));
+
+
+
+
 const StyledAppointmentTooltipLayout = styled(AppointmentTooltip.Layout)((props) => ({
   [`&.${classes.layout}`]: {
       maxHeight: props.size.innerHeight / 1.6
       
   },
 }));
+
+
 
 
 const Layout = (({
@@ -679,14 +823,24 @@ const BooleanEditor =(props) => {
   }
 }
 
-const DateEditor=(props) => {
+const DateEditor= (props) => {
+
+  //const appointments = useSelector(state => state.calendar.appointments); // <--------------------------------
+  
+
+  //const onDateFieldChange = (props) => {
+  //  const startDate = props
+  //  console.log("fecha -----> ", startDate)
+  //  return(props.onValueChange)
+  //};
+
   return ( 
   <LocalizationProvider dateAdapter={AdapterMoment}>
     <DateTimePicker
     label="Fecha"
     renderInput={ props => <TextField {...props} />}
     value={props.value}
-    onChange={props.onValueChange}
+    onChange={props.onValueChange} // <-----------------------------------------------
     className={props.className}
     readOnly={props.readOnly}
   />
@@ -701,8 +855,10 @@ const TextEditor = (props) => {
 };
 
 const BasicLayout = ({ onFieldChange, appointmentData, ...restProps }) => {
+  console.log("Holaaaaaa",restProps)
   const patients = useSelector(state => state.user.patients);
   const professionals = useSelector(state => state.user.professionals);
+  const appointments = useSelector(state => state.calendar.appointments);
   const onPatientFieldChange = (event, newValue) => {
     onFieldChange({ patients: newValue || null });
   };
@@ -722,6 +878,25 @@ const BasicLayout = ({ onFieldChange, appointmentData, ...restProps }) => {
         else{
           return null
       }}}
+
+      selectComponent={(props) => {
+        console.log("select---------->",props)
+        return <AppointmentForm.Select {...props}/>
+      }}
+
+      resourceEditorComponent={(props) => {
+        console.log("resource----------->",restProps, appointments)
+        if(props.resource.fieldName==="location"){
+          const salasOcupadas = [
+            "dGaR8U71v1S30ULL8gWo",
+            "bglXWfGQHPqTleHSqn1I"
+          ]
+
+          props.resource.instances = props.resource.instances.filter(resource => !salasOcupadas.includes(resource.id))
+        }
+        return <AppointmentForm.ResourceEditor {...props}/>
+      }}
+
     >
 
       <Autocomplete
@@ -765,12 +940,52 @@ export default function AdminCalendar(){
     {fieldName: 'location', title: 'Ubicación',instances: []}
   ]);
   const therapies = useSelector(state => state.resource.therapies);
-  const locations = useSelector(state => state.resource.locations);
+  const locations = useSelector(state => state.resource.locations); // <--------------------------------
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
+  const [currentLocation, setCurrentLocation] = useState(0);
+
+  const resourcesToLocations = (locations) => {
+    const locToRes = locations.map((location)=>{
+      return {id:location.id, name: location.text}
+    });
+    return locToRes
+  }
+
+  const handleCurrentLocationChange = (location) => {
+    console.log(location)
+    setResources((previousState) => { 
+      return previousState.map((resource)=>{
+        return resource.fieldName == 'location'? {...resource, instances: resourcesToLocations([location])} : resource
+      })
+    })
+    setCurrentLocation(location)
+  }
+
   const handleCurrentDateChange = (currentDate) => {
     setCurrentDate(currentDate)
   }
+
+  const locationsToResources = (locations) => {
+    const locToRes = locations.map((location)=>{
+      return {id:location.id, text: location.name}
+    });
+    return locToRes
+  }
+
+  const flexibleSpace = connectProps(FlexibleSpace, () => {
+
+    return {
+      location: locationsToResources([currentLocation])[0],
+      locations: locationsToResources(locations),
+      locationChange: handleCurrentLocationChange,
+    };
+  });
+
+
+  useEffect(() => {
+    flexibleSpace.update()
+  })
 
   const dataSession = useLocation();
 
@@ -814,7 +1029,7 @@ export default function AdminCalendar(){
       const locToRes = locations.map((location)=>{
         return {id:location.id, text: location.name}
       });
-      setResources((previousState) => {
+      setResources((previousState) => { //<---------------------------------------------------------------------------------
         return previousState.map((resource)=>{
           return resource.fieldName == 'location'? {...resource, instances: locToRes} : resource
         })
@@ -866,7 +1081,7 @@ export default function AdminCalendar(){
   return (
       <Paper>
         <Scheduler
-          data={data}
+          data={filterAppointmentsByLocation(data, currentLocation)}
           locale='es-ES'
           height={870}
         >
@@ -874,6 +1089,8 @@ export default function AdminCalendar(){
             currentDate={currentDate}
             onCurrentDateChange={handleCurrentDateChange}
           />
+
+
           <EditingState
             onCommitChanges={handleCommitChanges}
           />
@@ -889,7 +1106,7 @@ export default function AdminCalendar(){
           <EditRecurrenceMenu messages={editRecurrenceMenuMessages}/>
           <ConfirmationDialog messages={confirmationDialogMessages}/>
 
-          <Toolbar />
+          <Toolbar flexibleSpaceComponent={flexibleSpace}/>
           <DateNavigator />
           <TodayButton messages={todayButtonMessages}/>
           <ViewSwitcher />
@@ -904,6 +1121,7 @@ export default function AdminCalendar(){
             showCloseButton
             showDeleteButton
           />
+          
           <AppointmentForm
             basicLayoutComponent={BasicLayout}
             textEditorComponent={TextEditor}
@@ -913,7 +1131,7 @@ export default function AdminCalendar(){
           />
           <Resources
             data={resources}
-            mainResourceName="therapy"
+            mainResourceName="location"
           />
           <DragDropProvider />        
         </Scheduler>
