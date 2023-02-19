@@ -199,7 +199,7 @@ const StyledFormControl = styled(FormControl)(({ theme: { spacing } }) => ({
 
 // filterTasks
 const filterAppointmentsByLocation = (appointments, location) => {
-  console.log("ES ACA ES ACAAAA",location.id, appointments)
+  console.log("filter appointments",location.id, appointments)
   return appointments.filter(appointment => (
   !location.id || appointment.location === location.id
 ))};
@@ -212,7 +212,7 @@ const StyledToolbarFlexibleSpace = styled(Toolbar.FlexibleSpace)(() => ({
 
 const StyledPrioritySelectorItem = styled('div')(({ theme: { palette, spacing }, color }) => ({
   [`& .${classes.bullet}`]: {
-    backgroundColor: color ? color[400] : palette.divider,
+    backgroundColor: color ? color : palette.divider,
     borderRadius: '50%',
     width: spacing(2),
     height: spacing(2),
@@ -239,8 +239,9 @@ const StyledPrioritySelectorItem = styled('div')(({ theme: { palette, spacing },
 const PrioritySelectorItem = ({
   color, text: resourceTitle,
 }) => {
-  const text = resourceTitle || 'All Tasks';
-  const shortText = resourceTitle ? text.substring(0, 1) : 'All';
+
+  const text = resourceTitle || 'Todas las Salas';
+  const shortText = resourceTitle ? text.substring(0, 1) : 'Todas';
   return (
     <StyledPrioritySelectorItem className={classes.prioritySelectorItem} color={color}>
       <span className={classes.bullet} />
@@ -261,11 +262,12 @@ const PrioritySelector = ({
         value={location}
         onChange={(e) => {
           console.log(e)
-          locationChange(e.target.value);
+          locationChange(e.target.value === 0 ? locations : [e.target.value]);
         }}
-        renderValue={() => (
-          <PrioritySelectorItem text={location.text} color={location.color} />
-        )}
+        renderValue={() => {
+          console.log("VAMO BOCA",location)
+          return <PrioritySelectorItem text={location.text} color={location.color} />
+        }}
       >
         <MenuItem value={0}>
           <PrioritySelectorItem />
@@ -855,17 +857,15 @@ const TextEditor = (props) => {
 };
 
 const BasicLayout = ({ onFieldChange, appointmentData, ...restProps }) => {
-  console.log("Holaaaaaa",restProps)
   const patients = useSelector(state => state.user.patients);
   const professionals = useSelector(state => state.user.professionals);
-  const appointments = useSelector(state => state.calendar.appointments);
   const onPatientFieldChange = (event, newValue) => {
     onFieldChange({ patients: newValue || null });
   };
   const onProfessionalFieldChange = (event, newValue) => {
     onFieldChange({ professionals: newValue || null });
   };
-  //console.log(restProps.appointmentRef);
+
   return (
     <AppointmentForm.BasicLayout
       appointmentData={appointmentData}
@@ -878,12 +878,8 @@ const BasicLayout = ({ onFieldChange, appointmentData, ...restProps }) => {
         else{
           return null
       }}}
-
-      selectComponent={(props) => {
-        console.log("select---------->",props)
-        return <AppointmentForm.Select {...props}/>
-      }}
-
+      // ESTO CORTA TODA LA LUZ
+      /*
       resourceEditorComponent={(props) => {
         console.log("resource----------->",restProps, appointments)
         if(props.resource.fieldName==="location"){
@@ -895,7 +891,7 @@ const BasicLayout = ({ onFieldChange, appointmentData, ...restProps }) => {
           props.resource.instances = props.resource.instances.filter(resource => !salasOcupadas.includes(resource.id))
         }
         return <AppointmentForm.ResourceEditor {...props}/>
-      }}
+      }} */
 
     >
 
@@ -947,19 +943,18 @@ export default function AdminCalendar(){
 
   const resourcesToLocations = (locations) => {
     const locToRes = locations.map((location)=>{
-      return {id:location.id, name: location.text}
+      return {id:location.id, name: location.text, color: location.color}
     });
     return locToRes
   }
 
   const handleCurrentLocationChange = (location) => {
-    console.log(location)
     setResources((previousState) => { 
       return previousState.map((resource)=>{
-        return resource.fieldName == 'location'? {...resource, instances: resourcesToLocations([location])} : resource
+        return resource.fieldName == 'location'? {...resource, instances: location} : resource
       })
     })
-    setCurrentLocation(location)
+    setCurrentLocation(location.length > 1 ? 0 : location[0])
   }
 
   const handleCurrentDateChange = (currentDate) => {
@@ -967,16 +962,18 @@ export default function AdminCalendar(){
   }
 
   const locationsToResources = (locations) => {
+    console.log("Empieza locationsToResources ", locations)
     const locToRes = locations.map((location)=>{
-      return {id:location.id, text: location.name}
+      return {id:location.id, text: location.name, color: location.color}
     });
+    console.log("Termina locationsToResources ", locToRes)
     return locToRes
   }
 
   const flexibleSpace = connectProps(FlexibleSpace, () => {
 
     return {
-      location: locationsToResources([currentLocation])[0],
+      location: currentLocation,
       locations: locationsToResources(locations),
       locationChange: handleCurrentLocationChange,
     };
@@ -1027,7 +1024,7 @@ export default function AdminCalendar(){
   const handleLocationsToResources = () => {
     if(locations.length > 0){
       const locToRes = locations.map((location)=>{
-        return {id:location.id, text: location.name}
+        return {id:location.id, text: location.name, color: location.color}
       });
       setResources((previousState) => { //<---------------------------------------------------------------------------------
         return previousState.map((resource)=>{
@@ -1075,6 +1072,9 @@ export default function AdminCalendar(){
     handleSessionFocus()
   },[dataSession])
 
+  useEffect(()=>{
+    console.log("resources --> ",resources)
+  },[resources])
 
 
 
