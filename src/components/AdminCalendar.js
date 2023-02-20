@@ -256,18 +256,17 @@ const PrioritySelectorItem = ({
 const PrioritySelector = ({
   location, locations, locationChange
 }) => {
-  console.log("Location y locations PrioritySelect",location, locations)
+
   return (
     <StyledFormControl className={classes.prioritySelector} variant="standard">
       <Select
         disableUnderline
         value={location}
         onChange={(e) => {
-          console.log(e)
+
           locationChange(e.target.value === 0 ? locations : [e.target.value]);
         }}
         renderValue={() => {
-          console.log("VAMO BOCA",location)
           return <PrioritySelectorItem text={location.text} color={location.color} />
         }}
       >
@@ -945,12 +944,6 @@ export default function AdminCalendar(){
   const [loading, setLoading] = useState(false);
   const [currentLocation, setCurrentLocation] = useState(0);
 
-  const resourcesToLocations = (locations) => {
-    const locToRes = locations.map((location)=>{
-      return {id:location.id, name: location.text, color: location.color}
-    });
-    return locToRes
-  }
 
   const handleCurrentLocationChange = (location) => {
     setResources((previousState) => { 
@@ -966,11 +959,12 @@ export default function AdminCalendar(){
   }
 
   const locationsToResources = (locations) => {
-    console.log("Empieza locationsToResources ", locations)
+
     const locToRes = locations.map((location)=>{
       return {id:location.id, text: location.name, color: location.color}
     });
-    console.log("Termina locationsToResources ", locToRes)
+    
+
     return locToRes
   }
 
@@ -990,11 +984,6 @@ export default function AdminCalendar(){
 
   const dataSession = useLocation();
 
-  const addTherapy = (appointment) => {
-    const therapy = therapies.find(therapy => therapy.id === appointment.therapy)
-    appointment = {...appointment, therapy: therapy}
-    return appointment
-  }
 
   const handleCommitChanges = (action) => {
     console.log('commit ',action);

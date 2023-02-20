@@ -117,8 +117,8 @@ export default function MonthlyInvoice(props) {
   const [columns] = useState([
     { name: 'location', title: 'Sala' },
     { name: 'month', title: 'Mes' },
-    { name: 'year', title: 'Year' },
-    { name: 'amount', title: 'Monto (ARS$)' }
+    { name: 'year', title: 'Año' },
+    { name: 'amount', title: 'Monto($)' }
   ]);
   const invoices = useSelector(state => state.resource.locationInvoices);
   //console.log('invoices, ',invoices)
@@ -147,7 +147,10 @@ export default function MonthlyInvoice(props) {
         return invoices.map((invoice) => {
             return {
                 ...invoice,
-                location: invoice.location.name
+                location: invoice.location.name,
+                month: invoice.month,
+                year: invoice.year,
+                amount: invoice.amount
             }
         })
     })
