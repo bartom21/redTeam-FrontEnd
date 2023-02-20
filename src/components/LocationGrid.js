@@ -26,15 +26,33 @@ import {
 
 import { loadLocations } from "../store/actions/resources.js"; 
 
+import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
+import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
 
-import { updateLocationRate } from "../store/actions/updateLocationRate.js"; 
+import { updateLocationRate } from "../store/actions/updateLocationRate.js";
+import { createLocation } from "../store/actions/createLocation.js"; 
+import { deleteLocation } from "../store/actions/createLocation.js"; 
 
 import { Alert, Snackbar } from "@mui/material";
 import { Loading } from "./Loading/Loading.js";
+
+
+const AddButton = ({ onExecute }) => (
+  <div style={{ textAlign: 'center' }}>
+    <Button
+      color="primary"
+      onClick={onExecute}
+      title="Create new row"
+    >
+      New
+    </Button>
+  </div>
+);
+
 
 const EditButton = ({ onExecute }) => (
   <IconButton onClick={onExecute} title="Editar Tarifa" size="large">
@@ -54,8 +72,26 @@ const CancelButton = ({ onExecute }) => (
   </IconButton>
 );
 
+const DeleteButton = ({ onExecute }) => (
+  <IconButton
+    onClick={() => {
+      // eslint-disable-next-line
+      if (window.confirm('Are you sure you want to delete this row?')) {
+        onExecute();
+      }
+    }}
+    title="Delete row"
+    size="large"
+  >
+    <DeleteIcon />
+  </IconButton>
+);
+
+
 const commandComponents = {
+  add: AddButton,
   edit: EditButton,
+  delete: DeleteButton,
   commit: CommitButton,
   cancel: CancelButton,
 };
@@ -141,9 +177,7 @@ export default function LocationGrid(props) {
   const [validationStatus, setValidationStatus] = useState({});
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false);
-  const [editingStateColumnExtensions] = useState([
-    { columnName: 'name', editingEnabled: false }
-  ]);
+  const [editingStateColumnExtensions] = useState([]);
 
   const [columnWidths, setColumnWidths] = useState([
     { columnName: 'name', width: window.innerWidth/(columns.length + 1.5)},
@@ -151,27 +185,30 @@ export default function LocationGrid(props) {
   ])
 
 
-  const commitChanges = ({changed}) => {
-    if (Object.values(changed)[0]) {
-      const validation = validate(changed, validationStatus)
-      setValidationStatus({ ...validationStatus, ...validation });
-      const validationValue = Object.values(validation)[0]
-      if( validationValue && validationValue.rate && validationValue.rate.isValid){
-        const id = Object.keys(changed)[0];
-        const rate = Object.values(changed)[0].rate;
-        const location = {
-            id,
-            rate
-        }
+  const commitChanges = ({changed, added, deleted}) => {
+    console.log(deleted)
+    if (changed) {
         setLoading(true)
-        dispatch(updateLocationRate(location, handleLoading))
-      }
+        dispatch(updateLocationRate(changed, handleLoading))
+    }
+    else if (added) {
+        setLoading(true)
+        dispatch(createLocation(added[0], handleLoading))
+    }
+    else if (deleted) {
+      const id = deleted[0]
+      const data = {}
+      data[id] = {deleted: true}
+      setLoading(true)
+      dispatch(updateLocationRate(data, handleLoading))
     }
   };
+  
 
   const handleLocationsToRows = () => {
+    const locationsToRender = locations.filter(x => x.deleted === false)
     setRows(() => {
-        return locations.map((location) => { 
+        return locationsToRender.map((location) => { 
             return {
                ...location
             }
@@ -270,8 +307,9 @@ export default function LocationGrid(props) {
           cellComponent={EditCell}
         />
         <TableEditColumn
+            showAddCommand
             showEditCommand
-
+            showDeleteCommand
             commandComponent={Command}
         />
         <Toolbar />
@@ -295,4 +333,4 @@ export default function LocationGrid(props) {
         {loading && <Loading />}
     </Paper>
   );
-};
+}

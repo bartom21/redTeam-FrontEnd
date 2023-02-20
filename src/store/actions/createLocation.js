@@ -1,13 +1,11 @@
-export const UPDATELOCATION = 'UPDATELOCATION';
+export const CREATELOCATION = 'CREATELOCATION';
 
-export const updateLocationRate = (data , handleLoading) => {
-
+export const createLocation = (data , handleLoading) => {
     return (dispatch, getState) => {
-        const id = Object.keys(data)[0];
         getState().auth.currentUser.getIdToken(true)
             .then(idToken => {
-                fetch(`http://localhost:8080/updateLocationRate/${id}`, {
-                    method: 'PUT',
+                fetch('http://localhost:8080/createLocation', {
+                    method: 'POST',
                     headers: {
                     "Content-Type": "application/json",
                     "Authorization": idToken
@@ -27,8 +25,8 @@ export const updateLocationRate = (data , handleLoading) => {
                     return response.json();
                 })
                 .then((myJson) => {
-                    console.log('RESPONSE', myJson);
-                    dispatch({type: UPDATELOCATION, location: myJson});
+                    console.log(myJson);
+                    dispatch({type:CREATELOCATION, location: myJson});
                     if(handleLoading){handleLoading()}
                 })
             })

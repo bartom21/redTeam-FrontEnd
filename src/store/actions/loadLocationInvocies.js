@@ -1,20 +1,15 @@
-export const UPDATELOCATION = 'UPDATELOCATION';
+export const LOADLOCATIONINVOICES = 'LOADLOCATIONINVOICES';
 
-export const updateLocationRate = (data , handleLoading) => {
-
+export const loadLocationInvocies = (handleLoading) => {
     return (dispatch, getState) => {
-        const id = Object.keys(data)[0];
         getState().auth.currentUser.getIdToken(true)
             .then(idToken => {
-                fetch(`http://localhost:8080/updateLocationRate/${id}`, {
-                    method: 'PUT',
+                fetch('http://localhost:8080/locationInvoices', {
+                    method: 'GET',
                     headers: {
                     "Content-Type": "application/json",
                     "Authorization": idToken
-                    },
-                    body: JSON.stringify({
-                        location: data
-                    })
+                    }
                 })
                 .then((response) => {
                     console.log('RESPONSE');
@@ -27,9 +22,8 @@ export const updateLocationRate = (data , handleLoading) => {
                     return response.json();
                 })
                 .then((myJson) => {
-                    console.log('RESPONSE', myJson);
-                    dispatch({type: UPDATELOCATION, location: myJson});
-                    if(handleLoading){handleLoading()}
+                    dispatch({type:LOADLOCATIONINVOICES, invoices: myJson.invoices});
+                    handleLoading()
                 })
             })
             .catch(err => console.log(err));
