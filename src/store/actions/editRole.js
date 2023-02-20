@@ -7,7 +7,7 @@ export const editRole = (event, handleLoading) => {
         const uid = Object.keys(event.changed)[0];
         getState().auth.currentUser.getIdToken(true)
             .then(idToken => {
-                fetch(`https://back-red-team.vercel.app:8080/userRole/${uid}`, {
+                fetch(`https://back-red-team.vercel.app/userRole/${uid}`, {
                     method: 'PUT',
                     headers: {
                     "Content-Type": "application/json",

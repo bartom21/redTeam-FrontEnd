@@ -4,7 +4,7 @@ export const loadLocationInvocies = (handleLoading) => {
     return (dispatch, getState) => {
         getState().auth.currentUser.getIdToken(true)
             .then(idToken => {
-                fetch('https://back-red-team.vercel.app:8080/locationInvoices', {
+                fetch('https://back-red-team.vercel.app/locationInvoices', {
                     method: 'GET',
                     headers: {
                     "Content-Type": "application/json",

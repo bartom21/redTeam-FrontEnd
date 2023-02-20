@@ -6,7 +6,7 @@ export const addAppointment = (appointment) => {
     return (dispatch, getState) => {
         getState().auth.currentUser.getIdToken(true)
             .then(idToken => {
-                fetch('https://back-red-team.vercel.app:8080/session', {
+                fetch('https://back-red-team.vercel.app/session', {
                     method: 'POST',
                     headers: {
                     "Content-Type": "application/json",
