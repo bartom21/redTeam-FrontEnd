@@ -22,6 +22,8 @@ import { connectProps } from '@devexpress/dx-react-core';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 
+import { Alert, Snackbar } from "@mui/material";
+
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -931,6 +933,8 @@ const BasicLayout = ({ onFieldChange, appointmentData, ...restProps }) => {
 export default function AdminCalendar(){
   const [currentDate, setCurrentDate] = useState(new Date())
   const data = useSelector(state => state.calendar.appointments);
+  const availableLocations = useSelector(state => state.calendar.availableLocations);
+  const [error, setError] = useState('')
   const [resources, setResources] = useState([
     {fieldName: 'therapy', title: 'Tipo de terapia',instances: []},
     {fieldName: 'location', title: 'Ubicación',instances: []}
@@ -1076,7 +1080,13 @@ export default function AdminCalendar(){
     console.log("resources --> ",resources)
   },[resources])
 
-
+  useEffect(()=>{
+    if(availableLocations.length > 0){
+      const salas = availableLocations.map(loc => loc.name)
+      const textSalas = salas.join(', ')
+      setError('La sesion no se pudo crear ya que la sala se encuentra ocupada. Las salas disponibles para la fecha/s seleccionada son: '+textSalas)
+    }
+    },[availableLocations])
 
   return (
       <Paper>
@@ -1136,6 +1146,15 @@ export default function AdminCalendar(){
           <DragDropProvider />        
         </Scheduler>
         {loading && <Loading />}
+        {error && <Snackbar
+        autoHideDuration={10000}
+          anchorOrigin={{ vertical:'bottom', horizontal:'center' }}
+          open={error ? true : false}
+          onClose={() => setError('')}
+          sx={{ width: '60%' }}
+        >
+            <Alert severity="error" sx={{ width: '100%' }}>{error}</Alert>
+          </Snackbar>}
       </Paper>
     )
 }

@@ -2,18 +2,21 @@
 import { EDITAPPOINTMENT } from '../actions/editAppointment';
 import { LOADAPPOINTMENTS } from "../actions/loadAppointments";
 import { LOADRAPPOINTMENTS } from "../actions/addCommenToRecurrent";
-import { ADDAPPOINTMENT } from "../actions/addAppointment";
+import { ADDAPPOINTMENT, LOCATIONNOTAVAILABLE } from "../actions/addAppointment";
 import { EMPTYCAPPOINTMENT } from '../actions/emptyCurrentAppoinment';
 import { USERLOGOUT } from "../actions/userLogout";
 
 
 const initialState = {
     appointments: [],
-    currentAppointment: null
+    currentAppointment: null,
+    availableLocations: []
 };
 
 export default (state = initialState, action) => {
     switch(action.type){
+        case LOCATIONNOTAVAILABLE:
+            return {...state, availableLocations: action.available_locations}
         case ADDAPPOINTMENT:
             return {...state, appointments: state.appointments.concat([action.appointment])};
         case EDITAPPOINTMENT:

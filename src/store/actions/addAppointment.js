@@ -1,5 +1,6 @@
 
-export const ADDAPPOINTMENT = 'ADDAPPOINTMENT';;
+export const ADDAPPOINTMENT = 'ADDAPPOINTMENT';
+export const LOCATIONNOTAVAILABLE = 'LOCATIONNOTAVAILABLE'
 
 export const addAppointment = (appointment) => {
     return (dispatch, getState) => {
@@ -27,7 +28,12 @@ export const addAppointment = (appointment) => {
                 })
                 .then((myJson) => {
                     console.log(myJson);
-                    dispatch({type:ADDAPPOINTMENT, appointment: myJson.appointment});
+                    if(myJson.success){
+                        dispatch({type:ADDAPPOINTMENT, appointment: myJson.appointment});
+                    } else {
+                        dispatch({type:LOCATIONNOTAVAILABLE, available_locations: myJson.available_locations});
+                    }
+                    
                 })
             })
             .catch(err => console.log(err));
