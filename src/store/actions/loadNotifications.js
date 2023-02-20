@@ -4,7 +4,7 @@ export const loadNotifications = () => {
     return (dispatch, getState) => {
         getState().auth.currentUser.getIdToken(true)
             .then(idToken => {
-                fetch('http://localhost:8080/notifications', {
+                fetch('https://back-red-team.vercel.app:8080/notifications', {
                     method: 'GET',
                     headers: {
                     "Content-Type": "application/json",
