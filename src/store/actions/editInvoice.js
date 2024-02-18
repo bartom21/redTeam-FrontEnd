@@ -6,7 +6,7 @@ export const editInvoice = (data) => {
         const invoiceId = data.oldInvoice.id;
         getState().auth.currentUser.getIdToken(true)
             .then(idToken => {
-                fetch(`https://back-red-team.vercel.app/invoice/${invoiceId}`, {
+                fetch(`http://localhost:8080/invoice/${invoiceId}`, {
                     method: 'PUT',
                     headers: {
                     "Content-Type": "application/json",

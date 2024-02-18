@@ -7,7 +7,7 @@ export const updateRate = (data , handleLoading) => {
         const id = data.id
         getState().auth.currentUser.getIdToken(true)
             .then(idToken => {
-                fetch(`https://back-red-team.vercel.app/updateRate/${id}`, {
+                fetch(`http://localhost:8080/updateRate/${id}`, {
                     method: 'PUT',
                     headers: {
                     "Content-Type": "application/json",

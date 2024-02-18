@@ -4,7 +4,7 @@ export const loadDiscounts = () => {
     return (dispatch, getState) => {
         getState().auth.currentUser.getIdToken(true)
             .then(idToken => {
-                fetch('https://back-red-team.vercel.app/discounts', {
+                fetch('http://localhost:8080/discounts', {
                     method: 'GET',
                     headers: {
                     "Content-Type": "application/json",

@@ -4,7 +4,7 @@ export const loadInvocies = (handleLoading) => {
     return (dispatch, getState) => {
         getState().auth.currentUser.getIdToken(true)
             .then(idToken => {
-                fetch('https://back-red-team.vercel.app/invoices', {
+                fetch('http://localhost:8080/invoices', {
                     method: 'GET',
                     headers: {
                     "Content-Type": "application/json",

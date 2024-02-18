@@ -7,7 +7,7 @@ export const editDiscount = (changed, handleLoading) => {
         const id = Object.keys(changed)[0];
         getState().auth.currentUser.getIdToken(true)
             .then(idToken => {
-                fetch(`https://back-red-team.vercel.app/discount/${id}`, {
+                fetch(`http://localhost:8080/discount/${id}`, {
                     method: 'PUT',
                     headers: {
                     "Content-Type": "application/json",
