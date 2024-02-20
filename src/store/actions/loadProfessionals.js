@@ -1,6 +1,6 @@
 export const LOADPROFESSIONALS = 'LOADPROFESSIONALS';
 
-export const loadProfessionals = () => {
+export const loadProfessionals = (handleLoading) => {
     return (dispatch, getState) => {
         getState().auth.currentUser.getIdToken(true)
             .then(idToken => {
@@ -24,6 +24,7 @@ export const loadProfessionals = () => {
                 .then((myJson) => {
                     console.log(myJson);
                     dispatch({type:LOADPROFESSIONALS, users: myJson.users});
+                    if(handleLoading){handleLoading()}
                 })
             })
             .catch(err => console.log(err));

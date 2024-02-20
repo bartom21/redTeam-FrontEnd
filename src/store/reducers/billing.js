@@ -20,10 +20,10 @@ export default (state = initialState, action) => {
             const updated = state.invoices.map((item) => item.id == action.invoice.id ? action.invoice : item );
             return {...state, invoices: updated};
         case EDITDISCOUNT:
-            const discount = state.discounts.find(x => x.patient === action.discount.patient)
+            const discount = state.discounts.find(x => x.professional === action.discount.professional)
             let updated2 = []
             if(discount){
-                updated2 = state.discounts.map((item) => item.patient == action.discount.patient ? action.discount : item );
+                updated2 = state.discounts.map((item) => item.professional == action.discount.professional ? action.discount : item );
             }else{
                 updated2 = state.discounts.concat([action.discount])
             }

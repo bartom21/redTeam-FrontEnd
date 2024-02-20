@@ -1,6 +1,6 @@
 export const LOADPATIENTS = 'LOADPATIENTS';
 
-export const loadPatients = (handleLoading) => {
+export const loadPatients = () => {
     return (dispatch, getState) => {
         getState().auth.currentUser.getIdToken(true)
             .then(idToken => {
@@ -24,7 +24,6 @@ export const loadPatients = (handleLoading) => {
                 .then((myJson) => {
                     console.log(myJson);
                     dispatch({type:LOADPATIENTS, users: myJson.users});
-                    if(handleLoading){handleLoading()}
                 })
             })
             .catch(err => console.log(err));

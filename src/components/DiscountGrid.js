@@ -23,7 +23,7 @@ import {
   TableFilterRow,
   TableColumnResizing
 } from '@devexpress/dx-react-grid-material-ui';
-import { loadPatients } from "../store/actions/loadPatients.js";
+import { loadProfessionals } from "../store/actions/loadProfessionals.js";
 import { loadDiscounts } from "../store/actions/loadDiscounts.js";
 import IconButton from '@mui/material/IconButton';
 import EditIcon from '@mui/icons-material/Edit';
@@ -34,7 +34,7 @@ import { editDiscount } from "../store/actions/editDiscount.js";
 import { Alert, Snackbar } from "@mui/material";
 
 const EditButton = ({ onExecute }) => (
-    <IconButton onClick={onExecute} title="Editar Descuento" size="large">
+    <IconButton onClick={onExecute} title="Editar Bonus" size="large">
       <EditIcon />
     </IconButton>
   );
@@ -132,10 +132,10 @@ const requiredRule = {
 export default function DiscountGrid(props) {
   const [columns] = useState([
     { name: 'name', title: 'Nombre' },
-    { name: 'discount', title: 'Descuento sobre tarifa (%)' },
+    { name: 'discount', title: 'Bonus sobre sueldo (%)' },
   ]);
   const [rows, setRows] = useState([]);
-  const patients = useSelector(state => state.user.patients);
+  const professionals = useSelector(state => state.user.professionals);
   const discounts = useSelector(state => state.billing.discounts);
   const [editingStateColumnExtensions] = useState([
     { columnName: 'name', editingEnabled: false },
@@ -167,12 +167,12 @@ export default function DiscountGrid(props) {
 
   const handleDiscountsToRows = () => {
     setRows(() => {
-        return patients.map((patient) => { 
-            const discount = discounts.find(x => x.patient === patient.id)
+        return professionals.map((professional) => { 
+            const discount = discounts.find(x => x.professional === professional.id)
             return {
-                name: patient ? patient.name : '',
+                name: professional ? professional.name : '',
                 discount: discount ? discount.rate : 0,
-                id: patient ? patient.id : new Date().getMilliseconds()
+                id: professional ? professional.id : new Date().getMilliseconds()
             }
         })
     })
@@ -181,12 +181,12 @@ export default function DiscountGrid(props) {
   useEffect(() => {
     handleDiscountsToRows()
     console.log(discounts)
-  }, [patients, discounts]);
+  }, [professionals, discounts]);
 
   useEffect(() => {
     setLoading(true)
     dispatch(loadDiscounts())
-    dispatch(loadPatients(handleLoading))
+    dispatch(loadProfessionals(handleLoading))
   }, []);
 
   const [columnWidths, setColumnWidths] = useState([
