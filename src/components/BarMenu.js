@@ -50,8 +50,8 @@ export default function BarMenu(props) {
       history.push("/tarifas")
     }
 
-    function handleDiscounts() {
-      history.push("/descuentos")
+    function handleRewards() {
+      history.push("/bonus")
     }
 
     var items = (<MenuList>
@@ -85,11 +85,11 @@ export default function BarMenu(props) {
               </ListItemIcon>
               Administrar Tarifas
             </MenuItem>
-            <MenuItem onClick={handleDiscounts}>
+            <MenuItem onClick={handleRewards}>
               <ListItemIcon>
                 <DiscountIcon fontSize="small" />
               </ListItemIcon>
-              Administrar Descuentos
+              Administrar Bonus
             </MenuItem>
             <MenuItem onClick={handleCobros}>
               <ListItemIcon>

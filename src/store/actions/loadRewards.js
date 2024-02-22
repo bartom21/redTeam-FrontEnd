@@ -1,21 +1,15 @@
+export const LOADREWARDS = 'LOADREWARDS';
 
-export const EDITDISCOUNT = 'EDITDISCOUNT';
-
-export const editDiscount = (changed, handleLoading) => {
-    console.log("editAppointment");
+export const loadRewards = () => {
     return (dispatch, getState) => {
-        const id = Object.keys(changed)[0];
         getState().auth.currentUser.getIdToken(true)
             .then(idToken => {
-                fetch(`http://localhost:8080/discount/${id}`, {
-                    method: 'PUT',
+                fetch('http://localhost:8080/rewards', {
+                    method: 'GET',
                     headers: {
                     "Content-Type": "application/json",
                     "Authorization": idToken
-                    },
-                    body: JSON.stringify({
-                    ...changed[id]
-                    })
+                    }
                 })
                 .then((response) => {
                     console.log('RESPONSE');
@@ -29,8 +23,7 @@ export const editDiscount = (changed, handleLoading) => {
                 })
                 .then((myJson) => {
                     console.log(myJson);
-                    dispatch({type:EDITDISCOUNT, discount: myJson.discount});
-                    if(handleLoading){handleLoading()}
+                    dispatch({type:LOADREWARDS, rewards: myJson.rewards});
                 })
             })
             .catch(err => console.log(err));

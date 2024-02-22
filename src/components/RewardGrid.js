@@ -24,13 +24,13 @@ import {
   TableColumnResizing
 } from '@devexpress/dx-react-grid-material-ui';
 import { loadProfessionals } from "../store/actions/loadProfessionals.js";
-import { loadDiscounts } from "../store/actions/loadDiscounts.js";
+import { loadRewards } from "../store/actions/loadRewards.js";
 import IconButton from '@mui/material/IconButton';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
 import { Loading } from './Loading/Loading.js';
-import { editDiscount } from "../store/actions/editDiscount.js";
+import { editReward } from "../store/actions/editReward.js";
 import { Alert, Snackbar } from "@mui/material";
 
 const EditButton = ({ onExecute }) => (
@@ -92,7 +92,7 @@ const requiredRule = {
     errorText: 'El valor debe ser un porcentaje dentro del rango [0,100)',
   };
   const validationRules = {
-    discount: [requiredRule, numberRule, percentageRule],
+    reward: [requiredRule, numberRule, percentageRule],
   };
   
   const validate = (changed, validationStatus) => Object.keys(changed).reduce((status, id) => {
@@ -129,14 +129,14 @@ const requiredRule = {
     return { ...status, [id]: rowStatus };
   }, {});
 
-export default function DiscountGrid(props) {
+export default function RewardGrid(props) {
   const [columns] = useState([
     { name: 'name', title: 'Nombre' },
-    { name: 'discount', title: 'Bonus sobre sueldo (%)' },
+    { name: 'reward', title: 'Bonus sobre sueldo (%)' },
   ]);
   const [rows, setRows] = useState([]);
   const professionals = useSelector(state => state.user.professionals);
-  const discounts = useSelector(state => state.billing.discounts);
+  const rewards = useSelector(state => state.billing.rewards);
   const [editingStateColumnExtensions] = useState([
     { columnName: 'name', editingEnabled: false },
   ]);
@@ -158,20 +158,20 @@ export default function DiscountGrid(props) {
       const validation = validate(changed, validationStatus)
       setValidationStatus({ ...validationStatus, ...validation });
       const validationValue = Object.values(validation)[0]
-      if( validationValue && validationValue.discount && validationValue.discount.isValid){
+      if( validationValue && validationValue.reward && validationValue.reward.isValid){
         setLoading(true)
-        dispatch(editDiscount(changed, handleLoading))
+        dispatch(editReward(changed, handleLoading))
     }
   };
 }
 
-  const handleDiscountsToRows = () => {
+  const handleRewardsToRows = () => {
     setRows(() => {
         return professionals.map((professional) => { 
-            const discount = discounts.find(x => x.professional === professional.id)
+            const reward = rewards.find(x => x.professional === professional.id)
             return {
                 name: professional ? professional.name : '',
-                discount: discount ? discount.rate : 0,
+                reward: reward ? reward.rate : 0,
                 id: professional ? professional.id : new Date().getMilliseconds()
             }
         })
@@ -179,32 +179,26 @@ export default function DiscountGrid(props) {
   }
 
   useEffect(() => {
-    handleDiscountsToRows()
-    console.log(discounts)
-  }, [professionals, discounts]);
+    handleRewardsToRows()
+    console.log(rewards)
+  }, [professionals, rewards]);
 
   useEffect(() => {
     setLoading(true)
-    dispatch(loadDiscounts())
+    dispatch(loadRewards())
     dispatch(loadProfessionals(handleLoading))
   }, []);
 
   const [columnWidths, setColumnWidths] = useState([
     { columnName: 'name', width: window.innerWidth/(columns.length + 1.5)},
-    { columnName: 'discount', width: window.innerWidth/(columns.length + 1.5) }
+    { columnName: 'reward', width: window.innerWidth/(columns.length + 1.5) }
   ])
-
-  /*useEffect(() => {
-    setRows(data);
-    console.log('setRows')
-    setLoading(false)
-  }, [data]);*/
 
   useEffect(() => {
     function handleWindowResize() {
       setColumnWidths([
         { columnName: 'name', width: window.innerWidth/(columns.length + 1.5)},
-        { columnName: 'discount', width: window.innerWidth/(columns.length + 1.5) }]);
+        { columnName: 'reward', width: window.innerWidth/(columns.length + 1.5) }]);
     }
 
     window.addEventListener('resize', handleWindowResize);
