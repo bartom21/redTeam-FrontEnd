@@ -5,7 +5,7 @@ export const addInvoice = (invoice) => {
     return (dispatch, getState) => {
         getState().auth.currentUser.getIdToken(true)
             .then(idToken => {
-                fetch('http://localhost:8080/invoice', {
+                fetch('https://pid-front.vercel.app/invoice', {
                     method: 'POST',
                     headers: {
                     "Content-Type": "application/json",

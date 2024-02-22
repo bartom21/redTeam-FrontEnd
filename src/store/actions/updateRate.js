@@ -7,7 +7,7 @@ export const updateRate = (data , handleLoading) => {
         const id = data.id
         getState().auth.currentUser.getIdToken(true)
             .then(idToken => {
-                fetch(`http://localhost:8080/updateRate/${id}`, {
+                fetch(`https://pid-front.vercel.app/updateRate/${id}`, {
                     method: 'PUT',
                     headers: {
                     "Content-Type": "application/json",

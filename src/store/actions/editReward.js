@@ -6,7 +6,7 @@ export const editReward = (changed, handleLoading) => {
         const id = Object.keys(changed)[0];
         getState().auth.currentUser.getIdToken(true)
             .then(idToken => {
-                fetch(`http://localhost:8080/reward/${id}`, {
+                fetch(`https://pid-front.vercel.app/reward/${id}`, {
                     method: 'PUT',
                     headers: {
                     "Content-Type": "application/json",

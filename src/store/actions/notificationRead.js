@@ -6,7 +6,7 @@ export const notificationRead = (notificationId) => {
     return (dispatch, getState) => {
         getState().auth.currentUser.getIdToken(true)
             .then(idToken => {
-                fetch(`http://localhost:8080/notification/${notificationId}`, {
+                fetch(`https://pid-front.vercel.app/notification/${notificationId}`, {
                     method: 'PUT',
                     headers: {
                     "Content-Type": "application/json",

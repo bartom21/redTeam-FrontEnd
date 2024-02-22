@@ -8,7 +8,7 @@ export const editAppointment = (event) => {
         const appointmentId = Object.keys(event.changed)[0];
         getState().auth.currentUser.getIdToken(true)
             .then(idToken => {
-                fetch(`http://localhost:8080/session/${appointmentId}`, {
+                fetch(`https://pid-front.vercel.app/session/${appointmentId}`, {
                     method: 'PUT',
                     headers: {
                     "Content-Type": "application/json",

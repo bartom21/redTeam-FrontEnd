@@ -7,7 +7,7 @@ export const deleteInvoice = (event, handleLoading) => {
         const invoiceId = event.deleted;
         getState().auth.currentUser.getIdToken(true)
             .then(idToken => {
-                fetch(`http://localhost:8080/deleteInvoice/${invoiceId}`, {
+                fetch(`https://pid-front.vercel.app/deleteInvoice/${invoiceId}`, {
                     method: 'PUT',
                     headers: {
                     "Content-Type": "application/json",

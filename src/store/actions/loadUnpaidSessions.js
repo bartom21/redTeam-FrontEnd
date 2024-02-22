@@ -4,7 +4,7 @@ export const loadUnpaidSessions = (handleLoading) => {
     return (dispatch, getState) => {
         getState().auth.currentUser.getIdToken(true)
             .then(idToken => {
-                fetch('http://localhost:8080/unpaidSessions', {
+                fetch('https://pid-front.vercel.app/unpaidSessions', {
                     method: 'GET',
                     headers: {
                     "Content-Type": "application/json",

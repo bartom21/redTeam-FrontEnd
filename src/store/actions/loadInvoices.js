@@ -4,7 +4,7 @@ export const loadInvocies = (handleLoading) => {
     return (dispatch, getState) => {
         getState().auth.currentUser.getIdToken(true)
             .then(idToken => {
-                fetch('http://localhost:8080/invoices', {
+                fetch('https://pid-front.vercel.app/invoices', {
                     method: 'GET',
                     headers: {
                     "Content-Type": "application/json",

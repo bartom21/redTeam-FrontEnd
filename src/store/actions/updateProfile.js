@@ -7,7 +7,7 @@ export const updateUserProfile = (data) => {
         const uid = data.id
         getState().auth.currentUser.getIdToken(true)
             .then(idToken => {
-                fetch(`http://localhost:8080/updateProfile/${uid}`, {
+                fetch(`https://pid-front.vercel.app/updateProfile/${uid}`, {
                     method: 'PUT',
                     headers: {
                     "Content-Type": "application/json",

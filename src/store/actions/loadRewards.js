@@ -4,7 +4,7 @@ export const loadRewards = () => {
     return (dispatch, getState) => {
         getState().auth.currentUser.getIdToken(true)
             .then(idToken => {
-                fetch('http://localhost:8080/rewards', {
+                fetch('https://pid-front.vercel.app/rewards', {
                     method: 'GET',
                     headers: {
                     "Content-Type": "application/json",

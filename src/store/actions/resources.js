@@ -5,7 +5,7 @@ export const loadTherapies = (handleLoading) => {
     return (dispatch, getState) => {
         getState().auth.currentUser.getIdToken(true)
             .then(idToken => {
-                fetch('http://localhost:8080/therapies', {
+                fetch('https://pid-front.vercel.app/therapies', {
                     method: 'GET',
                     headers: {
                     "Content-Type": "application/json",
@@ -36,7 +36,7 @@ export const loadLocations = () => {
     return (dispatch, getState) => {
         getState().auth.currentUser.getIdToken(true)
             .then(idToken => {
-                fetch('http://localhost:8080/locations', {
+                fetch('https://pid-front.vercel.app/locations', {
                     method: 'GET',
                     headers: {
                     "Content-Type": "application/json",

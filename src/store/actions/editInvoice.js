@@ -6,7 +6,7 @@ export const editInvoice = (data) => {
         const invoiceId = data.oldInvoice.id;
         getState().auth.currentUser.getIdToken(true)
             .then(idToken => {
-                fetch(`http://localhost:8080/invoice/${invoiceId}`, {
+                fetch(`https://pid-front.vercel.app/invoice/${invoiceId}`, {
                     method: 'PUT',
                     headers: {
                     "Content-Type": "application/json",
